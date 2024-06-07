@@ -41,6 +41,19 @@ class MainViewModel: ViewModel()  {
     private val _secureStorageCapabilities = MutableLiveData<SecureStorageCapabilities>()
     val secureStorageCapabilities: LiveData<SecureStorageCapabilities> = _secureStorageCapabilities
 
+    private val _deviceInfo = MutableLiveData<DeviceInfo>()
+    val deviceInfo: LiveData<DeviceInfo> = _deviceInfo
+
+    fun retrieveDeviceInfo() {
+        _deviceInfo.value = DeviceInfo(
+            deviceName = Build.MODEL,
+            deviceBrand = Build.MANUFACTURER,
+            deviceModel = Build.DEVICE,
+            androidVersion = Build.VERSION.RELEASE,
+            androidApiLevel = Build.VERSION.SDK_INT,
+        )
+    }
+
     fun inspectSecureStorageCapabilities(context: Context) {
         CoroutineScope(Dispatchers.Default).launch {
             val keyGuardManager: KeyguardManager = context.getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager

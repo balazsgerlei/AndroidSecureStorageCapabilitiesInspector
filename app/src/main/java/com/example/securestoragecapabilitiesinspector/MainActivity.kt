@@ -50,10 +50,12 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             SecureStorageCapabilitiesInspectorTheme {
+                val deviceInfoState = viewModel.deviceInfo.observeAsState()
                 val secureStorageCapabilitiesState = viewModel.secureStorageCapabilities.observeAsState()
 
                 SecureStorageCapabilitiesDisplayScreen(
-                    state = secureStorageCapabilitiesState.value,
+                    deviceInfoState = deviceInfoState.value,
+                    secureStorageCapabilitiesState = secureStorageCapabilitiesState.value,
                     modifier = Modifier.fillMaxSize(),
                 )
             }
@@ -62,14 +64,67 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        viewModel.retrieveDeviceInfo()
         viewModel.inspectSecureStorageCapabilities(this)
     }
 
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SecureStorageCapabilitiesDisplayScreen(
+    deviceInfoState: DeviceInfo?,
+    secureStorageCapabilitiesState: SecureStorageCapabilities?,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        color = MaterialTheme.colorScheme.background
+    ) {
+        Column(
+            modifier = modifier
+        ) {
+            DeviceInfoDisplay(
+                state = deviceInfoState,
+            )
+            SecureStorageCapabilitiesDisplay(
+                state = secureStorageCapabilitiesState,
+                modifier = Modifier.fillMaxSize(),
+            )
+        }
+    }
+}
+
+@Composable
+fun DeviceInfoDisplay(
+    state: DeviceInfo?,
+    modifier: Modifier = Modifier
+) {
+    if (state != null) {
+        Column (
+            modifier = modifier
+                .padding(start = 8.dp, top = 16.dp, end = 8.dp, bottom = 8.dp)
+                .fillMaxWidth(),
+        ) {
+            Text(
+                text = "${state.deviceBrand} ${state.deviceName} (${state.deviceModel})",
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier
+                    .padding(vertical = 4.dp, horizontal = 8.dp)
+                    .fillMaxWidth(),
+            )
+            Text(
+                text = "Android ${state.androidVersion} (API ${state.androidApiLevel})",
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier
+                    .padding(vertical = 4.dp, horizontal = 8.dp)
+                    .fillMaxWidth(),
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SecureStorageCapabilitiesDisplay(
     state: SecureStorageCapabilities?,
     modifier: Modifier = Modifier
 ) {
@@ -88,93 +143,89 @@ fun SecureStorageCapabilitiesDisplayScreen(
     var selectedKeyVariant by remember { mutableIntStateOf(moreSecureKeyVariant) }
     val options = listOf("AES", "RSA")
 
-    Surface(
-        color = MaterialTheme.colorScheme.background
-    ) {
-        if (state != null) {
-            Column(
-                modifier = modifier.padding(horizontal = 8.dp, vertical = 16.dp)
-            ) {
-                DeviceSecureDisplay(
-                    isDeviceSecure = state.isDeviceSecure,
-                    modifier = Modifier
-                        .padding(horizontal = 8.dp)
-                        .padding(bottom = 16.dp),
-                )
-                BiometricsEnrollmentStatusDisplay(
-                    biometricEnrollmentStatus = state.biometricEnrollmentStatus,
-                    modifier = Modifier
-                        .padding(horizontal = 8.dp)
-                        .padding(bottom = 16.dp),
-                )
-                HasStrongboxKeystoreDisplay(
-                    strongBoxKeystore = state.strongBoxKeystoreProperties,
-                    modifier = Modifier
-                        .padding(horizontal = 8.dp)
-                        .padding(bottom = 16.dp),
-                )
+    if (state != null) {
+        Column(
+            modifier = modifier.padding(horizontal = 8.dp, vertical = 8.dp)
+        ) {
+            DeviceSecureDisplay(
+                isDeviceSecure = state.isDeviceSecure,
+                modifier = Modifier
+                    .padding(horizontal = 8.dp)
+                    .padding(bottom = 16.dp),
+            )
+            BiometricsEnrollmentStatusDisplay(
+                biometricEnrollmentStatus = state.biometricEnrollmentStatus,
+                modifier = Modifier
+                    .padding(horizontal = 8.dp)
+                    .padding(bottom = 16.dp),
+            )
+            HasStrongboxKeystoreDisplay(
+                strongBoxKeystore = state.strongBoxKeystoreProperties,
+                modifier = Modifier
+                    .padding(horizontal = 8.dp)
+                    .padding(bottom = 16.dp),
+            )
 
-                Card (
-                    modifier = Modifier.fillMaxWidth()
+            Card (
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                MultiChoiceSegmentedButtonRow(
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .padding(top = 8.dp, bottom = 8.dp)
                 ) {
-                    MultiChoiceSegmentedButtonRow(
-                        modifier = Modifier
-                            .align(Alignment.CenterHorizontally)
-                            .padding(top = 8.dp, bottom = 8.dp)
-                    ) {
-                        options.forEachIndexed { index, label ->
-                            SegmentedButton(
-                                shape = SegmentedButtonDefaults.itemShape(index = index, count = options.size),
-                                onCheckedChange = {
-                                    selectedKeyVariant = index
-                                },
-                                checked = index == selectedKeyVariant
-                            ) {
-                                Text(label)
-                            }
+                    options.forEachIndexed { index, label ->
+                        SegmentedButton(
+                            shape = SegmentedButtonDefaults.itemShape(index = index, count = options.size),
+                            onCheckedChange = {
+                                selectedKeyVariant = index
+                            },
+                            checked = index == selectedKeyVariant
+                        ) {
+                            Text(label)
                         }
                     }
+                }
 
-                    val secureStorageCapabilitiesToDisplay = when(selectedKeyVariant) {
-                        0 -> state.aesKeySecureStorageCapabilities
-                        else -> state.rsaKeySecureStorageCapabilities
-                    }
-                    if (secureStorageCapabilitiesToDisplay.keyGenerationSuccessful) {
-                        KeyGenerationSecurityLevelDisplay(
-                            isKeyGenerationInsideSecureHardware = secureStorageCapabilitiesToDisplay.isKeyGenerationInsideSecureHardware,
-                            keyGenerationSecurityLevel = secureStorageCapabilitiesToDisplay.keyGenerationSecurityLevel,
-                            modifier = Modifier
-                                .padding(horizontal = 8.dp)
-                                .padding(bottom = 8.dp),
-                        )
-                        UserAuthenticationRequirementEnforcementDisplay(
-                            biometricEnrollmentStatus = state.biometricEnrollmentStatus ,
-                            isUserAuthenticationRequirementEnforcedBySecureHardware = secureStorageCapabilitiesToDisplay.isUserAuthenticationRequirementEnforcedBySecureHardware,
-                            modifier = Modifier
-                                .padding(horizontal = 8.dp)
-                                .padding(bottom = 16.dp),
-                        )
-                    } else {
-                        Text(
-                            text = "Could not get Key information",
-                            modifier = Modifier
-                                .align(Alignment.CenterHorizontally)
-                                .padding(bottom = 16.dp),
-                        )
-                    }
+                val secureStorageCapabilitiesToDisplay = when(selectedKeyVariant) {
+                    0 -> state.aesKeySecureStorageCapabilities
+                    else -> state.rsaKeySecureStorageCapabilities
+                }
+                if (secureStorageCapabilitiesToDisplay.keyGenerationSuccessful) {
+                    KeyGenerationSecurityLevelDisplay(
+                        isKeyGenerationInsideSecureHardware = secureStorageCapabilitiesToDisplay.isKeyGenerationInsideSecureHardware,
+                        keyGenerationSecurityLevel = secureStorageCapabilitiesToDisplay.keyGenerationSecurityLevel,
+                        modifier = Modifier
+                            .padding(horizontal = 8.dp)
+                            .padding(bottom = 8.dp),
+                    )
+                    UserAuthenticationRequirementEnforcementDisplay(
+                        biometricEnrollmentStatus = state.biometricEnrollmentStatus ,
+                        isUserAuthenticationRequirementEnforcedBySecureHardware = secureStorageCapabilitiesToDisplay.isUserAuthenticationRequirementEnforcedBySecureHardware,
+                        modifier = Modifier
+                            .padding(horizontal = 8.dp)
+                            .padding(bottom = 16.dp),
+                    )
+                } else {
+                    Text(
+                        text = "Could not get Key information",
+                        modifier = Modifier
+                            .align(Alignment.CenterHorizontally)
+                            .padding(bottom = 16.dp),
+                    )
                 }
             }
-        } else {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center,
-            ) {
-                CircularProgressIndicator(
-                    modifier = Modifier.width(64.dp),
-                    color = MaterialTheme.colorScheme.secondary,
-                    trackColor = MaterialTheme.colorScheme.surfaceVariant,
-                )
-            }
+        }
+    } else {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center,
+        ) {
+            CircularProgressIndicator(
+                modifier = Modifier.width(64.dp),
+                color = MaterialTheme.colorScheme.secondary,
+                trackColor = MaterialTheme.colorScheme.surfaceVariant,
+            )
         }
     }
 }
@@ -259,7 +310,7 @@ fun HasStrongboxKeystoreDisplay(strongBoxKeystore: StrongBoxKeystoreProperties?,
         StrongBoxKeystoreProperties.VERSION_UNKNOWN -> Color(0xFFFFC107)
         StrongBoxKeystoreProperties.V300, StrongBoxKeystoreProperties.V200, StrongBoxKeystoreProperties.V100, StrongBoxKeystoreProperties.V41, StrongBoxKeystoreProperties.V40 -> Color(0xFF4CAF50)
     }
-        Row(
+    Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier,
     ) {
@@ -394,7 +445,14 @@ fun UserAuthenticationRequirementEnforcementDisplay(
 fun SecureStorageCapabilitiesDisplayScreenPreview() {
     SecureStorageCapabilitiesInspectorTheme {
         SecureStorageCapabilitiesDisplayScreen(
-            state = SecureStorageCapabilities(
+            deviceInfoState = DeviceInfo(
+                deviceName = "Pixel 8 Pro",
+                deviceBrand = "Google",
+                deviceModel = "husky",
+                androidVersion = "14",
+                androidApiLevel = 34,
+            ),
+            secureStorageCapabilitiesState = SecureStorageCapabilities(
                 isDeviceSecure = true,
                 biometricEnrollmentStatus = BiometricEnrollmentStatus.ENROLLED,
                 strongBoxKeystoreProperties = StrongBoxKeystoreProperties.V100,
@@ -413,5 +471,56 @@ fun SecureStorageCapabilitiesDisplayScreenPreview() {
                 ),
             ),
             modifier = Modifier.fillMaxSize())
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun DeviceInfoDisplayPreview() {
+    SecureStorageCapabilitiesInspectorTheme {
+        Surface(
+            color = MaterialTheme.colorScheme.background
+        ) {
+            DeviceInfoDisplay(
+                state = DeviceInfo(
+                    deviceName = "Pixel 8 Pro",
+                    deviceBrand = "Google",
+                    deviceModel = "husky",
+                    androidVersion = "14",
+                    androidApiLevel = 34,
+                ),
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun SecureStorageCapabilitiesDisplayPreview() {
+    SecureStorageCapabilitiesInspectorTheme {
+        Surface(
+            color = MaterialTheme.colorScheme.background
+        ) {
+            SecureStorageCapabilitiesDisplay(
+                state = SecureStorageCapabilities(
+                    isDeviceSecure = true,
+                    biometricEnrollmentStatus = BiometricEnrollmentStatus.ENROLLED,
+                    strongBoxKeystoreProperties = StrongBoxKeystoreProperties.V100,
+                    aesKeySecureStorageCapabilities = KeySecureStorageCapabilities(
+                        keyGenerationSuccessful = true,
+                        isKeyGenerationInsideSecureHardware = true,
+                        keyGenerationSecurityLevel = KeyGenerationSecurityLevel.STRONGBOX,
+                        isUserAuthenticationRequirementEnforcedBySecureHardware = true,
+                    ),
+
+                    rsaKeySecureStorageCapabilities = KeySecureStorageCapabilities(
+                        keyGenerationSuccessful = true,
+                        isKeyGenerationInsideSecureHardware = true,
+                        keyGenerationSecurityLevel = KeyGenerationSecurityLevel.STRONGBOX,
+                        isUserAuthenticationRequirementEnforcedBySecureHardware = true,
+                    ),
+                ),
+            )
+        }
     }
 }
