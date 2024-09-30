@@ -1,5 +1,5 @@
-# Created by https://www.toptal.com/developers/gitignore/api/kotlin,java,android,gradle,androidstudio,intellij,macos
-# Edit at https://www.toptal.com/developers/gitignore?templates=kotlin,java,android,gradle,androidstudio,intellij,macos
+# Created by https://www.toptal.com/developers/gitignore/api/macos,kotlin,java,android,gradle,androidstudio,intellij
+# Edit at https://www.toptal.com/developers/gitignore?templates=macos,kotlin,java,android,gradle,androidstudio,intellij
 
 ### Android ###
 # Gradle files
@@ -331,8 +331,10 @@ obj/
 .idea/gradle.xml
 .idea/jarRepositories.xml
 .idea/navEditor.xml
+.idea/androidTestResultsUserPreferences.xml
 .idea/deploymentTargetDropDown.xml
 .idea/deploymentTargetSelector.xml
+.idea/other.xml
 
 # Legacy Eclipse project files
 .cproject
@@ -359,4 +361,4 @@ obj/
 
 !/gradle/wrapper/gradle-wrapper.jar
 
-# End of https://www.toptal.com/developers/gitignore/api/kotlin,java,android,gradle,androidstudio,intellij,macos
+# End of https://www.toptal.com/developers/gitignore/api/macos,kotlin,java,android,gradle,androidstudio,intellij
