@@ -12,12 +12,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Dangerous
 import androidx.compose.material.icons.filled.DeviceUnknown
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -29,9 +33,11 @@ import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -41,6 +47,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.securestoragecapabilitiesinspector.ui.theme.SecureStorageCapabilitiesInspectorTheme
 import java.lang.StringBuilder
+import java.security.cert.Certificate
 
 class MainActivity : AppCompatActivity() {
 
@@ -52,10 +59,12 @@ class MainActivity : AppCompatActivity() {
             SecureStorageCapabilitiesInspectorTheme {
                 val deviceInfoState = viewModel.deviceInfo.observeAsState()
                 val secureStorageCapabilitiesState = viewModel.secureStorageCapabilities.observeAsState()
+                val shouldShowDialog = remember { mutableStateOf(false) }
 
                 SecureStorageCapabilitiesDisplayScreen(
                     deviceInfoState = deviceInfoState.value,
                     secureStorageCapabilitiesState = secureStorageCapabilitiesState.value,
+                    shouldShowDialog = shouldShowDialog,
                     modifier = Modifier.fillMaxSize(),
                 )
             }
@@ -74,6 +83,7 @@ class MainActivity : AppCompatActivity() {
 fun SecureStorageCapabilitiesDisplayScreen(
     deviceInfoState: DeviceInfo?,
     secureStorageCapabilitiesState: SecureStorageCapabilities?,
+    shouldShowDialog: MutableState<Boolean>,
     modifier: Modifier = Modifier
 ) {
     Surface(
@@ -87,6 +97,7 @@ fun SecureStorageCapabilitiesDisplayScreen(
             )
             SecureStorageCapabilitiesDisplay(
                 state = secureStorageCapabilitiesState,
+                shouldShowDialog = shouldShowDialog,
                 modifier = Modifier.fillMaxSize(),
             )
         }
@@ -126,6 +137,7 @@ fun DeviceInfoDisplay(
 @Composable
 fun SecureStorageCapabilitiesDisplay(
     state: SecureStorageCapabilities?,
+    shouldShowDialog: MutableState<Boolean>,
     modifier: Modifier = Modifier
 ) {
     // We show the key with the higher security level initially
@@ -202,6 +214,13 @@ fun SecureStorageCapabilitiesDisplay(
                     UserAuthenticationRequirementEnforcementDisplay(
                         biometricEnrollmentStatus = state.biometricEnrollmentStatus ,
                         isUserAuthenticationRequirementEnforcedBySecureHardware = secureStorageCapabilitiesToDisplay.isUserAuthenticationRequirementEnforcedBySecureHardware,
+                        modifier = Modifier
+                            .padding(horizontal = 8.dp)
+                            .padding(bottom = 8.dp),
+                    )
+                    CertificateChainDisplay(
+                        certificateChain = secureStorageCapabilitiesToDisplay.certificateChain,
+                        shouldShowDialog = shouldShowDialog,
                         modifier = Modifier
                             .padding(horizontal = 8.dp)
                             .padding(bottom = 16.dp),
@@ -440,9 +459,70 @@ fun UserAuthenticationRequirementEnforcementDisplay(
     }
 }
 
+@Composable
+fun CertificateChainDisplay(
+    certificateChain: Array<Certificate>?,
+    shouldShowDialog: MutableState<Boolean>,
+    modifier: Modifier = Modifier,
+) {
+     if (certificateChain != null) {
+        if (shouldShowDialog.value) {
+            val certificateChainString = buildString {
+                certificateChain.forEachIndexed { index, certificate ->
+                    append(certificate.toString())
+                    if (index != certificateChain.lastIndex) {
+                        append("\n-------------------------------------------------------\n\n")
+                    }
+                }
+            }
+            AlertDialog(
+                onDismissRequest = {
+                    shouldShowDialog.value = false
+                },
+                title = { Text(text = "Certificate Chain") },
+                text = {
+                    Text(
+                        text = certificateChainString,
+                        modifier = Modifier
+                            .verticalScroll(rememberScrollState())
+                    )
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            shouldShowDialog.value = false
+                        }
+                    ) {
+                        Text(
+                            text = "Confirm",
+                            color = Color.White
+                        )
+                    }
+                }
+            )
+        } else {
+            Button(
+                modifier = modifier,
+                onClick = {
+                    shouldShowDialog.value = true
+                }
+            ) {
+                Text("Show Certificate Chain")
+            }
+        }
+    } else {
+        Text(
+            text = "No Certificate Chain",
+            modifier = modifier.padding(start = 8.dp),
+        )
+    }
+}
+
 @Preview(showBackground = true)
 @Composable
 fun SecureStorageCapabilitiesDisplayScreenPreview() {
+    val shouldShowDialog = remember { mutableStateOf(false) }
+
     SecureStorageCapabilitiesInspectorTheme {
         SecureStorageCapabilitiesDisplayScreen(
             deviceInfoState = DeviceInfo(
@@ -470,6 +550,7 @@ fun SecureStorageCapabilitiesDisplayScreenPreview() {
                     isUserAuthenticationRequirementEnforcedBySecureHardware = true,
                 ),
             ),
+            shouldShowDialog = shouldShowDialog,
             modifier = Modifier.fillMaxSize())
     }
 }
@@ -497,6 +578,8 @@ fun DeviceInfoDisplayPreview() {
 @Preview(showBackground = true)
 @Composable
 fun SecureStorageCapabilitiesDisplayPreview() {
+    val shouldShowDialog = remember { mutableStateOf(false) }
+
     SecureStorageCapabilitiesInspectorTheme {
         Surface(
             color = MaterialTheme.colorScheme.background
@@ -520,6 +603,7 @@ fun SecureStorageCapabilitiesDisplayPreview() {
                         isUserAuthenticationRequirementEnforcedBySecureHardware = true,
                     ),
                 ),
+                shouldShowDialog = shouldShowDialog,
             )
         }
     }
