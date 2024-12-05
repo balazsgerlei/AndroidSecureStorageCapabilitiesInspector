@@ -133,7 +133,6 @@ fun DeviceInfoDisplay(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SecureStorageCapabilitiesDisplay(
     state: SecureStorageCapabilities?,
