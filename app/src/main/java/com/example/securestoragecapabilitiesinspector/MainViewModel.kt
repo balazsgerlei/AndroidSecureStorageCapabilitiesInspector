@@ -17,7 +17,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.math.BigInteger
-import java.security.GeneralSecurityException
 import java.security.Key
 import java.security.KeyFactory
 import java.security.KeyPair
@@ -190,11 +189,7 @@ class MainViewModel: ViewModel()  {
             setUserAuthenticationParameters(0, KeyProperties.AUTH_BIOMETRIC_STRONG or KeyProperties.AUTH_DEVICE_CREDENTIAL)
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            try {
-                setIsStrongBoxBacked(shouldUseStrongBox)
-            } catch (ex: StrongBoxUnavailableException) {
-                Log.d("SecureStorageCapabilitiesInspector", "StrongBox not available on the device")
-            }
+            setIsStrongBoxBacked(shouldUseStrongBox)
         }
         build()
     }
@@ -203,18 +198,8 @@ class MainViewModel: ViewModel()  {
         shouldUseStrongBox: Boolean = false,
         requireUserAuthentication: Boolean = true,
     ): KeyGenerator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES).also { keyGenerator ->
-        try {
-            createAESKeyGenSpec(shouldUseStrongBox, requireUserAuthentication)
-        } catch (ex: Exception) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && ex is StrongBoxUnavailableException) {
-                Log.d("SecureStorageCapabilitiesInspector", "StrongBox not available on the device, falling back to TEE")
-                createAESKeyGenSpec(shouldUseStrongBox = false, requireUserAuthentication)
-            } else {
-                null
-            }
-        }?.also {
-            keyGenerator.init(it)
-        }
+        val keyGenParameterSpec = createAESKeyGenSpec(shouldUseStrongBox, requireUserAuthentication)
+        keyGenerator.init(keyGenParameterSpec)
     }
 
     private fun generateSampleAESKey(
@@ -224,10 +209,16 @@ class MainViewModel: ViewModel()  {
         try {
             val keyGenerator = initKeyGeneratorWithAESKeyPair(shouldUseStrongBox, requireUserAuthentication)
             return keyGenerator.generateKey()
-        } catch (e: GeneralSecurityException) {
-            Log.d("SecureStorageCapabilitiesInspector", "Could not determine if private key is in secure hardware or not")
+        } catch (ex: Exception) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && ex is StrongBoxUnavailableException) {
+                Log.d("SecureStorageCapabilitiesInspector", "StrongBox not available on the device, falling back to TEE")
+                val keyGenerator = initKeyGeneratorWithAESKeyPair(shouldUseStrongBox = false, requireUserAuthentication)
+                return keyGenerator.generateKey()
+            } else {
+                Log.d("SecureStorageCapabilitiesInspector", "Could not determine if private key is in secure hardware or not")
+                return null
+            }
         }
-        return null
     }
 
     private fun getKeyInfoForSymmetricSecretKey(secretKey: SecretKey): KeyInfo {
@@ -256,11 +247,7 @@ class MainViewModel: ViewModel()  {
             setUserAuthenticationParameters(0, KeyProperties.AUTH_BIOMETRIC_STRONG or KeyProperties.AUTH_DEVICE_CREDENTIAL)
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            try {
-                setIsStrongBoxBacked(shouldUseStrongBox)
-            } catch (ex: StrongBoxUnavailableException) {
-                Log.d("SecureStorageCapabilitiesInspector", "StrongBox not available on the device")
-            }
+            setIsStrongBoxBacked(shouldUseStrongBox)
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && attestationChallenge != null) {
             setAttestationChallenge(attestationChallenge)
@@ -275,41 +262,58 @@ class MainViewModel: ViewModel()  {
     ): KeyPairGenerator = KeyPairGenerator.getInstance(KeyProperties.KEY_ALGORITHM_RSA, ANDROID_KEYSTORE)
         .also { keyPairGenerator ->
             val startDate = GregorianCalendar()
-            val endDate = GregorianCalendar()
-            endDate.add(Calendar.YEAR, 1)
-
-            try {
-                createRSAKeyGenSpec(startDate, endDate, shouldUseStrongBox, requireUserAuthentication, attestationChallenge)
-            } catch (ex: Exception) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && ex is StrongBoxUnavailableException) {
-                    Log.d("SecureStorageCapabilitiesInspector", "StrongBox not available on the device, falling back to TEE")
-                    createRSAKeyGenSpec(startDate, endDate, shouldUseStrongBox = false, requireUserAuthentication, attestationChallenge)
-                } else {
-                    null
-                }
-            }?.also {
-                keyPairGenerator.initialize(it)
+            val endDate = GregorianCalendar().apply {
+                add(Calendar.YEAR, 1)
             }
+
+            val keyGenParameterSpec = createRSAKeyGenSpec(startDate, endDate, shouldUseStrongBox, requireUserAuthentication, attestationChallenge)
+            keyPairGenerator.initialize(keyGenParameterSpec)
         }
 
     private fun generateSampleRSAKeyPair(
         shouldUseStrongBox: Boolean = false,
         requireUserAuthentication: Boolean = true,
     ): KeyPair? {
+        val attestationChallenge = "test challenge phrase".toByteArray()
         try {
             val keyPairGenerator = initKeyPairGeneratorWithRSAKeyPair(
                 shouldUseStrongBox,
                 requireUserAuthentication,
-                attestationChallenge = "test challenge phrase".toByteArray()
+                attestationChallenge,
             )
             return keyPairGenerator.genKeyPair()
-        } catch (pe: ProviderException) {
-            val keyPairGenerator = initKeyPairGeneratorWithRSAKeyPair(shouldUseStrongBox, requireUserAuthentication)
-            return keyPairGenerator.genKeyPair()
-        } catch (e: GeneralSecurityException) {
-            Log.d("SecureStorageCapabilitiesInspector", "Could not determine if private key is in secure hardware or not")
+        } catch (ex: Exception) {
+            if (ex is ProviderException) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && ex is StrongBoxUnavailableException) {
+                    Log.d("SecureStorageCapabilitiesInspector", "StrongBox not available on the device, falling back to TEE")
+                    try {
+                        val keyPairGenerator = initKeyPairGeneratorWithRSAKeyPair(
+                            shouldUseStrongBox = false,
+                            requireUserAuthentication,
+                            attestationChallenge,
+                        )
+                        return keyPairGenerator.genKeyPair()
+                    } catch (pe: ProviderException) {
+                        Log.d("SecureStorageCapabilitiesInspector", "ProviderException when attestation challenge provided re-init KeyPairGenerator without it")
+                        val keyPairGenerator = initKeyPairGeneratorWithRSAKeyPair(
+                            shouldUseStrongBox = false,
+                            requireUserAuthentication
+                        )
+                        return keyPairGenerator.genKeyPair()
+                    }
+                } else {
+                    Log.d("SecureStorageCapabilitiesInspector", "ProviderException when attestation challenge provided re-init KeyPairGenerator without it")
+                    val keyPairGenerator = initKeyPairGeneratorWithRSAKeyPair(
+                        shouldUseStrongBox,
+                        requireUserAuthentication
+                    )
+                    return keyPairGenerator.genKeyPair()
+                }
+            } else {
+                Log.d("SecureStorageCapabilitiesInspector", "Could not determine if private key is in secure hardware or not")
+                return null
+            }
         }
-        return null
     }
 
     private fun getKeyInfoForAsymmetricPrivateKey(privateKey: PrivateKey): KeyInfo {
