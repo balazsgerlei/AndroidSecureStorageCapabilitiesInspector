@@ -85,19 +85,19 @@ class MainViewModel: ViewModel()  {
                 isDeviceSecure,
                 biometricEnrollmentStatus,
                 strongBoxKeystoreProperties,
-                aesKeySecureStorageCapabilities = KeySecureStorageCapabilities(
-                    keyGenerationSuccessful = sampleAESKey != null && sampleAESKeyInfo != null,
-                    isKeyGenerationInsideSecureHardware = sampleAESKeyInfo?.isInsideSecureHardware ?: false,
-                    keyGenerationSecurityLevel = keyGenerationSecurityLevelFromKeyInfo(sampleAESKeyInfo),
-                    isUserAuthenticationRequirementEnforcedBySecureHardware = sampleAESKeyInfo?.isUserAuthenticationRequirementEnforcedBySecureHardware ?: false,
-                ),
                 rsaKeySecureStorageCapabilities = KeySecureStorageCapabilities(
                     keyGenerationSuccessful = sampleRSAKey != null && sampleRSAKeyInfo != null,
                     isKeyGenerationInsideSecureHardware = sampleRSAKeyInfo?.isInsideSecureHardware ?: false,
                     keyGenerationSecurityLevel = keyGenerationSecurityLevelFromKeyInfo(sampleRSAKeyInfo),
                     isUserAuthenticationRequirementEnforcedBySecureHardware = sampleRSAKeyInfo?.isUserAuthenticationRequirementEnforcedBySecureHardware ?: false,
                     certificateChain = rsaKeyCertificateChain,
-                )
+                ),
+                aesKeySecureStorageCapabilities = KeySecureStorageCapabilities(
+                    keyGenerationSuccessful = sampleAESKey != null && sampleAESKeyInfo != null,
+                    isKeyGenerationInsideSecureHardware = sampleAESKeyInfo?.isInsideSecureHardware ?: false,
+                    keyGenerationSecurityLevel = keyGenerationSecurityLevelFromKeyInfo(sampleAESKeyInfo),
+                    isUserAuthenticationRequirementEnforcedBySecureHardware = sampleAESKeyInfo?.isUserAuthenticationRequirementEnforcedBySecureHardware ?: false,
+                ),
             )
             CoroutineScope(Dispatchers.Main).launch {
                 _secureStorageCapabilities.value = secureStorageCapabilitiesResult

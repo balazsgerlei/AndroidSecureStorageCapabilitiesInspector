@@ -141,18 +141,18 @@ fun SecureStorageCapabilitiesDisplay(
 ) {
     // We show the key with the higher security level initially
     // As we are most interested in the highest capability of the device
-    // If security equasl, we default to show AES
+    // If security equals, we default to show RSA
     val aesKeySecureStorageCapabilities = state?.aesKeySecureStorageCapabilities
     val rsaKeySecureStorageCapabilities = state?.rsaKeySecureStorageCapabilities
     val keySecurityEquals =
         aesKeySecureStorageCapabilities?.isKeyGenerationInsideSecureHardware == rsaKeySecureStorageCapabilities?.isKeyGenerationInsideSecureHardware
             && aesKeySecureStorageCapabilities?.isUserAuthenticationRequirementEnforcedBySecureHardware == rsaKeySecureStorageCapabilities?.isUserAuthenticationRequirementEnforcedBySecureHardware
     val moreSecureKeyVariant =
-        if (keySecurityEquals || (aesKeySecureStorageCapabilities?.isKeyGenerationInsideSecureHardware == true
-            && aesKeySecureStorageCapabilities.isUserAuthenticationRequirementEnforcedBySecureHardware)) 0
+        if (keySecurityEquals || (rsaKeySecureStorageCapabilities?.isKeyGenerationInsideSecureHardware == true
+            && rsaKeySecureStorageCapabilities.isUserAuthenticationRequirementEnforcedBySecureHardware)) 0
         else 1
     var selectedKeyVariant by remember { mutableIntStateOf(moreSecureKeyVariant) }
-    val options = listOf("AES", "RSA")
+    val options = listOf("RSA", "AES")
 
     if (state != null) {
         Column(
@@ -199,8 +199,8 @@ fun SecureStorageCapabilitiesDisplay(
                 }
 
                 val secureStorageCapabilitiesToDisplay = when(selectedKeyVariant) {
-                    0 -> state.aesKeySecureStorageCapabilities
-                    else -> state.rsaKeySecureStorageCapabilities
+                    0 -> state.rsaKeySecureStorageCapabilities
+                    else -> state.aesKeySecureStorageCapabilities
                 }
                 if (secureStorageCapabilitiesToDisplay.keyGenerationSuccessful) {
                     KeyGenerationSecurityLevelDisplay(
@@ -535,14 +535,13 @@ fun SecureStorageCapabilitiesDisplayScreenPreview() {
                 isDeviceSecure = true,
                 biometricEnrollmentStatus = BiometricEnrollmentStatus.ENROLLED,
                 strongBoxKeystoreProperties = StrongBoxKeystoreProperties.V100,
-                aesKeySecureStorageCapabilities = KeySecureStorageCapabilities(
+                rsaKeySecureStorageCapabilities = KeySecureStorageCapabilities(
                     keyGenerationSuccessful = true,
                     isKeyGenerationInsideSecureHardware = true,
                     keyGenerationSecurityLevel = KeyGenerationSecurityLevel.STRONGBOX,
                     isUserAuthenticationRequirementEnforcedBySecureHardware = true,
                 ),
-
-                rsaKeySecureStorageCapabilities = KeySecureStorageCapabilities(
+                aesKeySecureStorageCapabilities = KeySecureStorageCapabilities(
                     keyGenerationSuccessful = true,
                     isKeyGenerationInsideSecureHardware = true,
                     keyGenerationSecurityLevel = KeyGenerationSecurityLevel.STRONGBOX,
@@ -588,14 +587,13 @@ fun SecureStorageCapabilitiesDisplayPreview() {
                     isDeviceSecure = true,
                     biometricEnrollmentStatus = BiometricEnrollmentStatus.ENROLLED,
                     strongBoxKeystoreProperties = StrongBoxKeystoreProperties.V100,
-                    aesKeySecureStorageCapabilities = KeySecureStorageCapabilities(
+                    rsaKeySecureStorageCapabilities = KeySecureStorageCapabilities(
                         keyGenerationSuccessful = true,
                         isKeyGenerationInsideSecureHardware = true,
                         keyGenerationSecurityLevel = KeyGenerationSecurityLevel.STRONGBOX,
                         isUserAuthenticationRequirementEnforcedBySecureHardware = true,
                     ),
-
-                    rsaKeySecureStorageCapabilities = KeySecureStorageCapabilities(
+                    aesKeySecureStorageCapabilities = KeySecureStorageCapabilities(
                         keyGenerationSuccessful = true,
                         isKeyGenerationInsideSecureHardware = true,
                         keyGenerationSecurityLevel = KeyGenerationSecurityLevel.STRONGBOX,
