@@ -464,7 +464,16 @@ fun CertificateChainDisplay(
     shouldShowDialog: MutableState<Boolean>,
     modifier: Modifier = Modifier,
 ) {
-     if (certificateChain != null) {
+    if (certificateChain != null) {
+        Button(
+            modifier = modifier,
+            enabled = !shouldShowDialog.value,
+            onClick = {
+                shouldShowDialog.value = true
+            }
+        ) {
+            Text("Show Certificate Chain")
+        }
         if (shouldShowDialog.value) {
             val certificateChainString = buildString {
                 certificateChain.forEachIndexed { index, certificate ->
@@ -499,15 +508,6 @@ fun CertificateChainDisplay(
                     }
                 }
             )
-        } else {
-            Button(
-                modifier = modifier,
-                onClick = {
-                    shouldShowDialog.value = true
-                }
-            ) {
-                Text("Show Certificate Chain")
-            }
         }
     } else {
         Text(
