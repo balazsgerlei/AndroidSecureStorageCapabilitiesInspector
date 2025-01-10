@@ -30,6 +30,7 @@ data class SecureStorageCapabilities (
     val biometricEnrollmentStatus: BiometricEnrollmentStatus,
     val strongBoxKeystoreProperties: StrongBoxKeystoreProperties?,
     val rsaKeySecureStorageCapabilities: KeySecureStorageCapabilities,
+    val ecKeySecureStorageCapabilities: KeySecureStorageCapabilities,
     val aesKeySecureStorageCapabilities: KeySecureStorageCapabilities,
 )
 

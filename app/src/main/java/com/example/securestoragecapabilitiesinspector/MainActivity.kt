@@ -27,6 +27,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheetDefaults.properties
 import androidx.compose.material3.MultiChoiceSegmentedButtonRow
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
@@ -45,6 +46,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
 import com.example.securestoragecapabilitiesinspector.ui.theme.SecureStorageCapabilitiesInspectorTheme
 import java.lang.StringBuilder
 import java.security.cert.Certificate
@@ -144,15 +146,16 @@ fun SecureStorageCapabilitiesDisplay(
     // If security equals, we default to show RSA
     val aesKeySecureStorageCapabilities = state?.aesKeySecureStorageCapabilities
     val rsaKeySecureStorageCapabilities = state?.rsaKeySecureStorageCapabilities
+    val ecKeySecureStorageCapabilities = state?.ecKeySecureStorageCapabilities
     val keySecurityEquals =
         aesKeySecureStorageCapabilities?.isKeyGenerationInsideSecureHardware == rsaKeySecureStorageCapabilities?.isKeyGenerationInsideSecureHardware
             && aesKeySecureStorageCapabilities?.isUserAuthenticationRequirementEnforcedBySecureHardware == rsaKeySecureStorageCapabilities?.isUserAuthenticationRequirementEnforcedBySecureHardware
     val moreSecureKeyVariant =
         if (keySecurityEquals || (rsaKeySecureStorageCapabilities?.isKeyGenerationInsideSecureHardware == true
             && rsaKeySecureStorageCapabilities.isUserAuthenticationRequirementEnforcedBySecureHardware)) 0
-        else 1
+        else 2
     var selectedKeyVariant by remember { mutableIntStateOf(moreSecureKeyVariant) }
-    val options = listOf("RSA", "AES")
+    val options = listOf("RSA", "EC", "AES")
 
     if (state != null) {
         Column(
@@ -200,6 +203,7 @@ fun SecureStorageCapabilitiesDisplay(
 
                 val secureStorageCapabilitiesToDisplay = when(selectedKeyVariant) {
                     0 -> state.rsaKeySecureStorageCapabilities
+                    1 -> state.ecKeySecureStorageCapabilities
                     else -> state.aesKeySecureStorageCapabilities
                 }
                 if (secureStorageCapabilitiesToDisplay.keyGenerationSuccessful) {
@@ -484,6 +488,11 @@ fun CertificateChainDisplay(
                 }
             }
             AlertDialog(
+                modifier = Modifier.fillMaxWidth()
+                    .padding(16.dp),
+                properties = DialogProperties(
+                    usePlatformDefaultWidth = false
+                ),
                 onDismissRequest = {
                     shouldShowDialog.value = false
                 },
@@ -541,6 +550,12 @@ fun SecureStorageCapabilitiesDisplayScreenPreview() {
                     keyGenerationSecurityLevel = KeyGenerationSecurityLevel.STRONGBOX,
                     isUserAuthenticationRequirementEnforcedBySecureHardware = true,
                 ),
+                ecKeySecureStorageCapabilities = KeySecureStorageCapabilities(
+                    keyGenerationSuccessful = true,
+                    isKeyGenerationInsideSecureHardware = true,
+                    keyGenerationSecurityLevel = KeyGenerationSecurityLevel.STRONGBOX,
+                    isUserAuthenticationRequirementEnforcedBySecureHardware = true,
+                ),
                 aesKeySecureStorageCapabilities = KeySecureStorageCapabilities(
                     keyGenerationSuccessful = true,
                     isKeyGenerationInsideSecureHardware = true,
@@ -588,6 +603,12 @@ fun SecureStorageCapabilitiesDisplayPreview() {
                     biometricEnrollmentStatus = BiometricEnrollmentStatus.ENROLLED,
                     strongBoxKeystoreProperties = StrongBoxKeystoreProperties.V100,
                     rsaKeySecureStorageCapabilities = KeySecureStorageCapabilities(
+                        keyGenerationSuccessful = true,
+                        isKeyGenerationInsideSecureHardware = true,
+                        keyGenerationSecurityLevel = KeyGenerationSecurityLevel.STRONGBOX,
+                        isUserAuthenticationRequirementEnforcedBySecureHardware = true,
+                    ),
+                    ecKeySecureStorageCapabilities = KeySecureStorageCapabilities(
                         keyGenerationSuccessful = true,
                         isKeyGenerationInsideSecureHardware = true,
                         keyGenerationSecurityLevel = KeyGenerationSecurityLevel.STRONGBOX,

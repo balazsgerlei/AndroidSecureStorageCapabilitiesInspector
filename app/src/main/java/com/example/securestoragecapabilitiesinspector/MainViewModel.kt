@@ -35,6 +35,7 @@ import javax.security.auth.x500.X500Principal
 private const val ANDROID_KEYSTORE = "AndroidKeyStore"
 private const val SAMPLE_AES_KEY_ALIAS = "sample_aes_key"
 private const val SAMPLE_RSA_KEY_ALIAS = "sample_rsa_key"
+private const val SAMPLE_EC_KEY_ALIAS = "sample_ec_key"
 
 class MainViewModel: ViewModel()  {
 
@@ -76,10 +77,15 @@ class MainViewModel: ViewModel()  {
             val sampleRSAKey = generateSampleRSAKeyPair(
                 shouldUseStrongBox = canUseStrongBoxForKeyGeneration,
                 requireUserAuthentication = canRequireUserAuthentication)?.private
+            val sampleECKey = generateSampleECKeyPair(
+                shouldUseStrongBox = canUseStrongBoxForKeyGeneration,
+                requireUserAuthentication = canRequireUserAuthentication)?.private
 
             val sampleAESKeyInfo = getKeyInfoForAESKey(sampleAESKey)
             val sampleRSAKeyInfo = getKeyInfoForRSAKey(sampleRSAKey)
+            val sampleECKeyInfo = getKeyInfoForECKey(sampleECKey)
             val rsaKeyCertificateChain: Array<Certificate>? = keyStore.getCertificateChain(sampleRSAKeyInfo?.keystoreAlias)
+            val ecKeyCertificateChain: Array<Certificate>? = keyStore.getCertificateChain(sampleECKeyInfo?.keystoreAlias)
 
             val secureStorageCapabilitiesResult = SecureStorageCapabilities(
                 isDeviceSecure,
@@ -91,6 +97,13 @@ class MainViewModel: ViewModel()  {
                     keyGenerationSecurityLevel = keyGenerationSecurityLevelFromKeyInfo(sampleRSAKeyInfo),
                     isUserAuthenticationRequirementEnforcedBySecureHardware = sampleRSAKeyInfo?.isUserAuthenticationRequirementEnforcedBySecureHardware ?: false,
                     certificateChain = rsaKeyCertificateChain,
+                ),
+                ecKeySecureStorageCapabilities = KeySecureStorageCapabilities(
+                    keyGenerationSuccessful = sampleECKey != null && sampleECKeyInfo != null,
+                    isKeyGenerationInsideSecureHardware = sampleECKeyInfo?.isInsideSecureHardware ?: false,
+                    keyGenerationSecurityLevel = keyGenerationSecurityLevelFromKeyInfo(sampleECKeyInfo),
+                    isUserAuthenticationRequirementEnforcedBySecureHardware = sampleECKeyInfo?.isUserAuthenticationRequirementEnforcedBySecureHardware ?: false,
+                    certificateChain = ecKeyCertificateChain,
                 ),
                 aesKeySecureStorageCapabilities = KeySecureStorageCapabilities(
                     keyGenerationSuccessful = sampleAESKey != null && sampleAESKeyInfo != null,
@@ -161,6 +174,10 @@ class MainViewModel: ViewModel()  {
     }
 
     private fun getKeyInfoForRSAKey(key: Key?) = key?.let {
+        getKeyInfoForAsymmetricPrivateKey(it as PrivateKey)
+    }
+
+    private fun getKeyInfoForECKey(key: Key?) = key?.let {
         getKeyInfoForAsymmetricPrivateKey(it as PrivateKey)
     }
 
@@ -304,6 +321,95 @@ class MainViewModel: ViewModel()  {
                 } else {
                     Log.d("SecureStorageCapabilitiesInspector", "ProviderException when attestation challenge provided re-init KeyPairGenerator without it")
                     val keyPairGenerator = initKeyPairGeneratorWithRSAKeyPair(
+                        shouldUseStrongBox,
+                        requireUserAuthentication
+                    )
+                    return keyPairGenerator.genKeyPair()
+                }
+            } else {
+                Log.d("SecureStorageCapabilitiesInspector", "Could not determine if private key is in secure hardware or not")
+                return null
+            }
+        }
+    }
+
+    private fun createECKeyGenSpec(
+        startDate: GregorianCalendar,
+        endDate: GregorianCalendar,
+        shouldUseStrongBox: Boolean,
+        requireUserAuthentication: Boolean,
+        attestationChallenge: ByteArray?,
+    ) : KeyGenParameterSpec = KeyGenParameterSpec.Builder(
+        SAMPLE_EC_KEY_ALIAS,
+        KeyProperties.PURPOSE_SIGN or KeyProperties.PURPOSE_VERIFY
+    ).run {
+        setCertificateSerialNumber(BigInteger.valueOf(777))
+        setCertificateSubject(X500Principal("CN=$SAMPLE_RSA_KEY_ALIAS"))
+        setDigests(KeyProperties.DIGEST_SHA256)
+        setCertificateNotBefore(startDate.time)
+        setCertificateNotAfter(endDate.time)
+        setUserAuthenticationRequired(requireUserAuthentication)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            setUserAuthenticationParameters(0, KeyProperties.AUTH_BIOMETRIC_STRONG or KeyProperties.AUTH_DEVICE_CREDENTIAL)
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            setIsStrongBoxBacked(shouldUseStrongBox)
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && attestationChallenge != null) {
+            setAttestationChallenge(attestationChallenge)
+        }
+        build()
+    }
+
+    private fun initKeyPairGeneratorWithECKeyPair(
+        shouldUseStrongBox: Boolean = false,
+        requireUserAuthentication: Boolean = true,
+        attestationChallenge: ByteArray? = null,
+    ): KeyPairGenerator = KeyPairGenerator.getInstance(KeyProperties.KEY_ALGORITHM_EC, ANDROID_KEYSTORE)
+        .also { keyPairGenerator ->
+            val startDate = GregorianCalendar()
+            val endDate = GregorianCalendar().apply {
+                add(Calendar.YEAR, 1)
+            }
+
+            val keyGenParameterSpec = createECKeyGenSpec(startDate, endDate, shouldUseStrongBox, requireUserAuthentication, attestationChallenge)
+            keyPairGenerator.initialize(keyGenParameterSpec)
+        }
+
+    private fun generateSampleECKeyPair(
+        shouldUseStrongBox: Boolean = false,
+        requireUserAuthentication: Boolean = true,
+    ): KeyPair? {
+        val attestationChallenge = "test challenge phrase".toByteArray()
+        try {
+            val keyPairGenerator = initKeyPairGeneratorWithECKeyPair(
+                shouldUseStrongBox,
+                requireUserAuthentication,
+                attestationChallenge,
+            )
+            return keyPairGenerator.genKeyPair()
+        } catch (ex: Exception) {
+            if (ex is ProviderException) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && ex is StrongBoxUnavailableException) {
+                    Log.d("SecureStorageCapabilitiesInspector", "StrongBox not available on the device, falling back to TEE")
+                    try {
+                        val keyPairGenerator = initKeyPairGeneratorWithECKeyPair(
+                            shouldUseStrongBox = false,
+                            requireUserAuthentication,
+                            attestationChallenge,
+                        )
+                        return keyPairGenerator.genKeyPair()
+                    } catch (pe: ProviderException) {
+                        Log.d("SecureStorageCapabilitiesInspector", "ProviderException when attestation challenge provided re-init KeyPairGenerator without it")
+                        val keyPairGenerator = initKeyPairGeneratorWithECKeyPair(
+                            shouldUseStrongBox = false,
+                            requireUserAuthentication
+                        )
+                        return keyPairGenerator.genKeyPair()
+                    }
+                } else {
+                    Log.d("SecureStorageCapabilitiesInspector", "ProviderException when attestation challenge provided re-init KeyPairGenerator without it")
+                    val keyPairGenerator = initKeyPairGeneratorWithECKeyPair(
                         shouldUseStrongBox,
                         requireUserAuthentication
                     )
