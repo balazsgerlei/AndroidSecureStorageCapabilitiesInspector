@@ -149,10 +149,14 @@ fun SecureStorageCapabilitiesDisplay(
     val ecKeySecureStorageCapabilities = state?.ecKeySecureStorageCapabilities
     val keySecurityEquals =
         aesKeySecureStorageCapabilities?.isKeyGenerationInsideSecureHardware == rsaKeySecureStorageCapabilities?.isKeyGenerationInsideSecureHardware
-            && aesKeySecureStorageCapabilities?.isUserAuthenticationRequirementEnforcedBySecureHardware == rsaKeySecureStorageCapabilities?.isUserAuthenticationRequirementEnforcedBySecureHardware
+                && rsaKeySecureStorageCapabilities?.isKeyGenerationInsideSecureHardware == ecKeySecureStorageCapabilities?.isKeyGenerationInsideSecureHardware
+                && aesKeySecureStorageCapabilities?.isUserAuthenticationRequirementEnforcedBySecureHardware == rsaKeySecureStorageCapabilities?.isUserAuthenticationRequirementEnforcedBySecureHardware
+                && rsaKeySecureStorageCapabilities?.isUserAuthenticationRequirementEnforcedBySecureHardware == ecKeySecureStorageCapabilities?.isUserAuthenticationRequirementEnforcedBySecureHardware
     val moreSecureKeyVariant =
         if (keySecurityEquals || (rsaKeySecureStorageCapabilities?.isKeyGenerationInsideSecureHardware == true
             && rsaKeySecureStorageCapabilities.isUserAuthenticationRequirementEnforcedBySecureHardware)) 0
+        else if (ecKeySecureStorageCapabilities?.isKeyGenerationInsideSecureHardware == true
+            && ecKeySecureStorageCapabilities.isUserAuthenticationRequirementEnforcedBySecureHardware) 1
         else 2
     var selectedKeyVariant by remember { mutableIntStateOf(moreSecureKeyVariant) }
     val options = listOf("RSA", "EC", "AES")
