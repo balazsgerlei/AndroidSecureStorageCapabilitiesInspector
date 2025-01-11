@@ -514,10 +514,7 @@ fun CertificateChainDisplay(
                             shouldShowDialog.value = false
                         }
                     ) {
-                        Text(
-                            text = "Confirm",
-                            color = Color.White
-                        )
+                        Text("Close")
                     }
                 }
             )
