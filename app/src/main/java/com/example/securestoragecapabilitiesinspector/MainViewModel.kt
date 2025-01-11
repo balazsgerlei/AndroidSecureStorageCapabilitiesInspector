@@ -253,12 +253,10 @@ class MainViewModel: ViewModel()  {
         SAMPLE_RSA_KEY_ALIAS,
         KeyProperties.PURPOSE_SIGN or KeyProperties.PURPOSE_VERIFY
     ).run {
-        setCertificateSerialNumber(BigInteger.valueOf(777))                 // Serial number used for the self-signed certificate of the generated key pair, default is 1
-        setCertificateSubject(X500Principal("CN=$SAMPLE_RSA_KEY_ALIAS"))  // Subject used for the self-signed certificate of the generated key pair, default is CN=fake
-        setDigests(KeyProperties.DIGEST_SHA256)                                 // Set of digests algorithms with which the key can be used
-        setSignaturePaddings(KeyProperties.SIGNATURE_PADDING_RSA_PKCS1)         // Set of padding schemes with which the key can be used when signing/verifying
-        setCertificateNotBefore(startDate.time)                                 // Start of the validity period for the self-signed certificate of the generated, default Jan 1 1970
-        setCertificateNotAfter(endDate.time)                                    // End of the validity period for the self-signed certificate of the generated key, default Jan 1 2048
+        setDigests(KeyProperties.DIGEST_SHA256)
+        setSignaturePaddings(KeyProperties.SIGNATURE_PADDING_RSA_PKCS1)
+        setCertificateNotBefore(startDate.time)
+        setCertificateNotAfter(endDate.time)
         setUserAuthenticationRequired(requireUserAuthentication)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             setUserAuthenticationParameters(0, KeyProperties.AUTH_BIOMETRIC_STRONG or KeyProperties.AUTH_DEVICE_CREDENTIAL)
@@ -343,8 +341,6 @@ class MainViewModel: ViewModel()  {
         SAMPLE_EC_KEY_ALIAS,
         KeyProperties.PURPOSE_SIGN or KeyProperties.PURPOSE_VERIFY
     ).run {
-        setCertificateSerialNumber(BigInteger.valueOf(777))
-        setCertificateSubject(X500Principal("CN=$SAMPLE_RSA_KEY_ALIAS"))
         setDigests(KeyProperties.DIGEST_SHA256)
         setCertificateNotBefore(startDate.time)
         setCertificateNotAfter(endDate.time)
