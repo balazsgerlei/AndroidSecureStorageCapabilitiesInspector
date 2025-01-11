@@ -332,8 +332,8 @@ fun HasStrongboxKeystoreDisplay(strongBoxKeystore: StrongBoxKeystoreProperties?,
         StrongBoxKeystoreProperties.V300, StrongBoxKeystoreProperties.V200, StrongBoxKeystoreProperties.V100, StrongBoxKeystoreProperties.V41, StrongBoxKeystoreProperties.V40 -> Icons.Default.CheckCircle
     }
     val iconTint = when(strongBoxKeystore) {
-        null -> Color(0xFFF44336)
-        StrongBoxKeystoreProperties.VERSION_UNKNOWN -> Color(0xFFFFC107)
+        null -> Color(0xFFFFC107)
+        StrongBoxKeystoreProperties.VERSION_UNKNOWN -> Color(0xFFBFE98D)
         StrongBoxKeystoreProperties.V300, StrongBoxKeystoreProperties.V200, StrongBoxKeystoreProperties.V100, StrongBoxKeystoreProperties.V41, StrongBoxKeystoreProperties.V40 -> Color(0xFF4CAF50)
     }
     Row(
