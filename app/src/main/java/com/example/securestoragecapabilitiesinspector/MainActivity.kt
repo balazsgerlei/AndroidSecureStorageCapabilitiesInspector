@@ -386,14 +386,18 @@ fun KeyGenerationSecurityLevelDisplay(
         }
 
         val keySecurityLevelIcon = when (keyGenerationSecurityLevel) {
-            null -> Icons.Default.Dangerous
+            null -> Icons.Default.Warning
             KeyGenerationSecurityLevel.SOFTWARE -> Icons.Default.Dangerous
             KeyGenerationSecurityLevel.UNKNOWN -> Icons.Default.DeviceUnknown
             KeyGenerationSecurityLevel.UNKNOWN_SECURE -> Icons.Default.Warning
             KeyGenerationSecurityLevel.TRUSTED_ENVIRONMENT, KeyGenerationSecurityLevel.STRONGBOX -> Icons.Default.Lock
         }
         val keySecurityLevelTint = when (keyGenerationSecurityLevel) {
-            null -> Color(0xFFF44336)
+            null -> {
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+                    Color(0xFFFFC107)
+                } else Color(0xFFF44336)
+            }
             KeyGenerationSecurityLevel.UNKNOWN, KeyGenerationSecurityLevel.SOFTWARE -> Color(
                 0xFFF44336
             )
