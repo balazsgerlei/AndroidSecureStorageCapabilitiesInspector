@@ -121,14 +121,14 @@ fun DeviceInfoDisplay(
                 text = "${state.deviceBrand} ${state.deviceName} (${state.deviceModel})",
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier
-                    .padding(vertical = 4.dp, horizontal = 8.dp)
+                    .padding(start = 8.dp, end = 8.dp, bottom = 2.dp)
                     .fillMaxWidth(),
             )
             Text(
                 text = "Android ${state.androidVersion} (API ${state.androidApiLevel})",
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier
-                    .padding(vertical = 4.dp, horizontal = 8.dp)
+                    .padding(horizontal = 8.dp)
                     .fillMaxWidth(),
             )
         }
@@ -163,19 +163,19 @@ fun SecureStorageCapabilitiesDisplay(
 
     if (state != null) {
         Column(
-            modifier = modifier.padding(horizontal = 8.dp, vertical = 8.dp)
+            modifier = modifier.padding(start = 8.dp, end = 8.dp, bottom = 8.dp)
         ) {
             DeviceSecureDisplay(
                 isDeviceSecure = state.isDeviceSecure,
                 modifier = Modifier
                     .padding(horizontal = 8.dp)
-                    .padding(bottom = 16.dp),
+                    .padding(bottom = 8.dp),
             )
             BiometricsEnrollmentStatusDisplay(
                 biometricEnrollmentStatus = state.biometricEnrollmentStatus,
                 modifier = Modifier
                     .padding(horizontal = 8.dp)
-                    .padding(bottom = 16.dp),
+                    .padding(bottom = 8.dp),
             )
             HasStrongboxKeystoreDisplay(
                 strongBoxKeystore = state.strongBoxKeystoreProperties,
@@ -230,7 +230,7 @@ fun SecureStorageCapabilitiesDisplay(
                         shouldShowDialog = shouldShowDialog,
                         modifier = Modifier
                             .padding(horizontal = 8.dp)
-                            .padding(bottom = 16.dp),
+                            .padding(bottom = 8.dp),
                     )
                 } else {
                     Text(
@@ -265,8 +265,8 @@ fun DeviceSecureDisplay(isDeviceSecure: Boolean, modifier: Modifier = Modifier) 
         Color(0xFF4CAF50)
     } else Color(0xFFF44336)
     val text =
-        if (isDeviceSecure) "Device is protected with a PIN, pattern or password"
-        else "Device unprotected (NO secure lock screen set)"
+        if (isDeviceSecure) "Protected with PIN, pattern or password"
+        else "Unprotected (NO secure lock screen set)"
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier,
@@ -324,8 +324,8 @@ fun BiometricsEnrollmentStatusDisplay(biometricEnrollmentStatus: BiometricEnroll
 @Composable
 fun HasStrongboxKeystoreDisplay(strongBoxKeystore: StrongBoxKeystoreProperties?, modifier: Modifier = Modifier) {
     val text = if (strongBoxKeystore != null) {
-        "Device has StrongBox Keystore: $strongBoxKeystore"
-    } else "Device has NO StrongBox Keystore"
+        "StrongBox Keystore version: $strongBoxKeystore"
+    } else "NO StrongBox Keystore"
     val icon = when(strongBoxKeystore) {
         null -> Icons.Default.Warning
         StrongBoxKeystoreProperties.VERSION_UNKNOWN -> Icons.Default.DeviceUnknown
