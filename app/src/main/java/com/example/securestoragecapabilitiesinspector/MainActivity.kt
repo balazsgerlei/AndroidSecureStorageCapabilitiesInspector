@@ -210,36 +210,11 @@ fun SecureStorageCapabilitiesDisplay(
                     1 -> state.ecKeySecureStorageCapabilities
                     else -> state.aesKeySecureStorageCapabilities
                 }
-                if (secureStorageCapabilitiesToDisplay.keyGenerationSuccessful) {
-                    KeyGenerationSecurityLevelDisplay(
-                        isKeyGenerationInsideSecureHardware = secureStorageCapabilitiesToDisplay.isKeyGenerationInsideSecureHardware,
-                        keyGenerationSecurityLevel = secureStorageCapabilitiesToDisplay.keyGenerationSecurityLevel,
-                        modifier = Modifier
-                            .padding(horizontal = 8.dp)
-                            .padding(bottom = 8.dp),
-                    )
-                    UserAuthenticationRequirementEnforcementDisplay(
-                        biometricEnrollmentStatus = state.biometricEnrollmentStatus ,
-                        isUserAuthenticationRequirementEnforcedBySecureHardware = secureStorageCapabilitiesToDisplay.isUserAuthenticationRequirementEnforcedBySecureHardware,
-                        modifier = Modifier
-                            .padding(horizontal = 8.dp)
-                            .padding(bottom = 8.dp),
-                    )
-                    CertificateChainDisplay(
-                        certificateChain = secureStorageCapabilitiesToDisplay.certificateChain,
-                        shouldShowDialog = shouldShowDialog,
-                        modifier = Modifier
-                            .padding(horizontal = 8.dp)
-                            .padding(bottom = 8.dp),
-                    )
-                } else {
-                    Text(
-                        text = "Could not get Key information",
-                        modifier = Modifier
-                            .align(Alignment.CenterHorizontally)
-                            .padding(bottom = 16.dp),
-                    )
-                }
+                KeySecurityDisplay(
+                    state = secureStorageCapabilitiesToDisplay,
+                    biometricEnrollmentStatus = state.biometricEnrollmentStatus,
+                    shouldShowDialog = shouldShowDialog,
+                )
             }
         }
     } else {
@@ -257,7 +232,10 @@ fun SecureStorageCapabilitiesDisplay(
 }
 
 @Composable
-fun DeviceSecureDisplay(isDeviceSecure: Boolean, modifier: Modifier = Modifier) {
+fun DeviceSecureDisplay(
+    isDeviceSecure: Boolean,
+    modifier: Modifier = Modifier
+) {
     val icon = if (isDeviceSecure) {
         Icons.Default.Lock
     } else Icons.Default.Warning
@@ -284,7 +262,10 @@ fun DeviceSecureDisplay(isDeviceSecure: Boolean, modifier: Modifier = Modifier) 
 }
 
 @Composable
-fun BiometricsEnrollmentStatusDisplay(biometricEnrollmentStatus: BiometricEnrollmentStatus, modifier: Modifier = Modifier) {
+fun BiometricsEnrollmentStatusDisplay(
+    biometricEnrollmentStatus: BiometricEnrollmentStatus,
+    modifier: Modifier = Modifier
+) {
     val icon = when(biometricEnrollmentStatus) {
         BiometricEnrollmentStatus.ENROLLED, BiometricEnrollmentStatus.ONLY_DEVICE_CREDENTIALS_ENROLLED -> Icons.Default.Lock
         else -> Icons.Default.Warning
@@ -322,9 +303,12 @@ fun BiometricsEnrollmentStatusDisplay(biometricEnrollmentStatus: BiometricEnroll
 }
 
 @Composable
-fun HasStrongboxKeystoreDisplay(strongBoxKeystore: StrongBoxKeystoreProperties?, modifier: Modifier = Modifier) {
+fun HasStrongboxKeystoreDisplay(
+    strongBoxKeystore: StrongBoxKeystoreProperties?,
+    modifier: Modifier = Modifier
+) {
     val text = if (strongBoxKeystore != null) {
-        "StrongBox Keystore version: $strongBoxKeystore"
+        "StrongBox Keystore supported: $strongBoxKeystore"
     } else "NO StrongBox Keystore"
     val icon = when(strongBoxKeystore) {
         null -> Icons.Default.Warning
@@ -353,11 +337,55 @@ fun HasStrongboxKeystoreDisplay(strongBoxKeystore: StrongBoxKeystoreProperties?,
 }
 
 @Composable
+fun KeySecurityDisplay(
+    state: KeySecureStorageCapabilities,
+    biometricEnrollmentStatus: BiometricEnrollmentStatus,
+    shouldShowDialog: MutableState<Boolean>,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+    ) {
+        if (state.keyGenerationSuccessful) {
+            KeyGenerationSecurityLevelDisplay(
+                isKeyGenerationInsideSecureHardware = state.isKeyGenerationInsideSecureHardware,
+                keyGenerationSecurityLevel = state.keyGenerationSecurityLevel,
+                modifier = Modifier
+                    .padding(horizontal = 8.dp)
+                    .padding(bottom = 8.dp),
+            )
+            UserAuthenticationRequirementEnforcementDisplay(
+                biometricEnrollmentStatus = biometricEnrollmentStatus ,
+                isUserAuthenticationRequirementEnforcedBySecureHardware = state.isUserAuthenticationRequirementEnforcedBySecureHardware,
+                modifier = Modifier
+                    .padding(horizontal = 8.dp)
+                    .padding(bottom = 8.dp),
+            )
+            CertificateChainDisplay(
+                certificateChain = state.certificateChain,
+                shouldShowDialog = shouldShowDialog,
+                modifier = Modifier
+                    .padding(horizontal = 8.dp)
+                    .padding(bottom = 8.dp),
+            )
+        } else {
+            Text(
+                text = "Could not get Key information",
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(start = 8.dp, end = 8.dp, bottom = 16.dp),
+            )
+        }
+    }
+
+}
+
+@Composable
 fun KeyGenerationSecurityLevelDisplay(
     isKeyGenerationInsideSecureHardware: Boolean,
     keyGenerationSecurityLevel: KeyGenerationSecurityLevel?,
-    modifier: Modifier = Modifier) {
-
+    modifier: Modifier = Modifier
+) {
     Column(
         modifier = modifier
     ) {
@@ -588,6 +616,29 @@ fun DeviceInfoDisplayPreview() {
                     androidVersion = "14",
                     androidApiLevel = 34,
                 ),
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun KeySecurityDisplayPreview() {
+    val shouldShowDialog = remember { mutableStateOf(false) }
+
+    SecureStorageCapabilitiesInspectorTheme {
+        Surface(
+            color = MaterialTheme.colorScheme.background
+        ) {
+            KeySecurityDisplay(
+                state = KeySecureStorageCapabilities(
+                    keyGenerationSuccessful = true,
+                    isKeyGenerationInsideSecureHardware = true,
+                    keyGenerationSecurityLevel = KeyGenerationSecurityLevel.STRONGBOX,
+                    isUserAuthenticationRequirementEnforcedBySecureHardware = true,
+                ),
+                biometricEnrollmentStatus = BiometricEnrollmentStatus.ENROLLED,
+                shouldShowDialog = shouldShowDialog,
             )
         }
     }
