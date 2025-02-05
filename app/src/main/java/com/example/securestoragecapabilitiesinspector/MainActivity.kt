@@ -214,6 +214,7 @@ fun SecureStorageCapabilitiesDisplay(
                     state = secureStorageCapabilitiesToDisplay,
                     biometricEnrollmentStatus = state.biometricEnrollmentStatus,
                     shouldShowDialog = shouldShowDialog,
+                    modifier = Modifier.padding(bottom = 8.dp)
                 )
             }
         }
@@ -365,15 +366,14 @@ fun KeySecurityDisplay(
                 certificateChain = state.certificateChain,
                 shouldShowDialog = shouldShowDialog,
                 modifier = Modifier
-                    .padding(horizontal = 8.dp)
-                    .padding(bottom = 8.dp),
+                    .padding(horizontal = 8.dp),
             )
         } else {
             Text(
                 text = "Could not get Key information",
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
-                    .padding(start = 8.dp, end = 8.dp, bottom = 16.dp),
+                    .padding(horizontal = 8.dp),
             )
         }
     }
@@ -554,7 +554,7 @@ fun CertificateChainDisplay(
     } else {
         Text(
             text = "No Certificate Chain",
-            modifier = modifier.padding(start = 8.dp),
+            modifier = modifier.padding(horizontal = 8.dp),
         )
     }
 }
@@ -628,7 +628,7 @@ fun KeySecurityDisplayPreview() {
 
     SecureStorageCapabilitiesInspectorTheme {
         Surface(
-            color = MaterialTheme.colorScheme.background
+            color = MaterialTheme.colorScheme.surfaceContainerHighest
         ) {
             KeySecurityDisplay(
                 state = KeySecureStorageCapabilities(
@@ -646,39 +646,52 @@ fun KeySecurityDisplayPreview() {
 
 @Preview(showBackground = true)
 @Composable
-fun SecureStorageCapabilitiesDisplayPreview() {
+fun CertificateChainDisplayPreview() {
     val shouldShowDialog = remember { mutableStateOf(false) }
 
     SecureStorageCapabilitiesInspectorTheme {
         Surface(
-            color = MaterialTheme.colorScheme.background
+            color = MaterialTheme.colorScheme.surfaceContainerHighest
         ) {
-            SecureStorageCapabilitiesDisplay(
-                state = SecureStorageCapabilities(
-                    isDeviceSecure = true,
-                    biometricEnrollmentStatus = BiometricEnrollmentStatus.ENROLLED,
-                    strongBoxKeystoreProperties = StrongBoxKeystoreProperties.V100,
-                    rsaKeySecureStorageCapabilities = KeySecureStorageCapabilities(
-                        keyGenerationSuccessful = true,
-                        isKeyGenerationInsideSecureHardware = true,
-                        keyGenerationSecurityLevel = KeyGenerationSecurityLevel.STRONGBOX,
-                        isUserAuthenticationRequirementEnforcedBySecureHardware = true,
-                    ),
-                    ecKeySecureStorageCapabilities = KeySecureStorageCapabilities(
-                        keyGenerationSuccessful = true,
-                        isKeyGenerationInsideSecureHardware = true,
-                        keyGenerationSecurityLevel = KeyGenerationSecurityLevel.STRONGBOX,
-                        isUserAuthenticationRequirementEnforcedBySecureHardware = true,
-                    ),
-                    aesKeySecureStorageCapabilities = KeySecureStorageCapabilities(
-                        keyGenerationSuccessful = true,
-                        isKeyGenerationInsideSecureHardware = true,
-                        keyGenerationSecurityLevel = KeyGenerationSecurityLevel.STRONGBOX,
-                        isUserAuthenticationRequirementEnforcedBySecureHardware = true,
-                    ),
-                ),
+            CertificateChainDisplay(
+                certificateChain = null,
                 shouldShowDialog = shouldShowDialog,
             )
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun SecureStorageCapabilitiesDisplayPreview() {
+    val shouldShowDialog = remember { mutableStateOf(false) }
+
+    SecureStorageCapabilitiesInspectorTheme {
+        SecureStorageCapabilitiesDisplay(
+            state = SecureStorageCapabilities(
+                isDeviceSecure = true,
+                biometricEnrollmentStatus = BiometricEnrollmentStatus.ENROLLED,
+                strongBoxKeystoreProperties = StrongBoxKeystoreProperties.V100,
+                rsaKeySecureStorageCapabilities = KeySecureStorageCapabilities(
+                    keyGenerationSuccessful = true,
+                    isKeyGenerationInsideSecureHardware = true,
+                    keyGenerationSecurityLevel = KeyGenerationSecurityLevel.STRONGBOX,
+                    isUserAuthenticationRequirementEnforcedBySecureHardware = true,
+                ),
+                ecKeySecureStorageCapabilities = KeySecureStorageCapabilities(
+                    keyGenerationSuccessful = true,
+                    isKeyGenerationInsideSecureHardware = true,
+                    keyGenerationSecurityLevel = KeyGenerationSecurityLevel.STRONGBOX,
+                    isUserAuthenticationRequirementEnforcedBySecureHardware = true,
+                ),
+                aesKeySecureStorageCapabilities = KeySecureStorageCapabilities(
+                    keyGenerationSuccessful = true,
+                    isKeyGenerationInsideSecureHardware = true,
+                    keyGenerationSecurityLevel = KeyGenerationSecurityLevel.STRONGBOX,
+                    isUserAuthenticationRequirementEnforcedBySecureHardware = true,
+                ),
+            ),
+            shouldShowDialog = shouldShowDialog,
+        )
     }
 }
