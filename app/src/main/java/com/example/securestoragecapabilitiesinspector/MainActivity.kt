@@ -29,6 +29,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheetDefaults.properties
 import androidx.compose.material3.MultiChoiceSegmentedButtonRow
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.Surface
@@ -50,6 +51,7 @@ import androidx.compose.ui.window.DialogProperties
 import com.example.securestoragecapabilitiesinspector.ui.theme.SecureStorageCapabilitiesInspectorTheme
 import java.lang.StringBuilder
 import java.security.cert.Certificate
+import java.security.cert.X509Certificate
 
 class MainActivity : AppCompatActivity() {
 
@@ -163,7 +165,9 @@ fun SecureStorageCapabilitiesDisplay(
 
     if (state != null) {
         Column(
-            modifier = modifier.padding(start = 8.dp, end = 8.dp, bottom = 8.dp)
+            modifier = modifier
+                .padding(start = 8.dp, end = 8.dp, bottom = 8.dp)
+                .verticalScroll(rememberScrollState())
         ) {
             DeviceSecureDisplay(
                 isDeviceSecure = state.isDeviceSecure,
@@ -505,6 +509,13 @@ fun CertificateChainDisplay(
     modifier: Modifier = Modifier,
 ) {
     if (certificateChain != null) {
+        Column (
+            modifier = modifier,
+        ) {
+            certificateChain.forEach { certificate ->
+                (certificate as? X509Certificate)?.let { CertificateDisplay(it) }
+            }
+        }
         Button(
             modifier = modifier,
             enabled = !shouldShowDialog.value,
@@ -512,7 +523,7 @@ fun CertificateChainDisplay(
                 shouldShowDialog.value = true
             }
         ) {
-            Text("Show Certificate Chain")
+            Text("Show Full Certificate Chain")
         }
         if (shouldShowDialog.value) {
             val certificateChainString = buildString {
@@ -556,6 +567,24 @@ fun CertificateChainDisplay(
             text = "No Certificate Chain",
             modifier = modifier.padding(horizontal = 8.dp),
         )
+    }
+}
+
+@Composable
+fun CertificateDisplay(
+    certificate: X509Certificate,
+    modifier: Modifier = Modifier,
+) {
+    OutlinedCard (
+        modifier = modifier.padding(bottom = 8.dp)
+    ) {
+        Column (
+            modifier = Modifier.padding(8.dp)
+        ) {
+            Text("subject: ${certificate.subjectX500Principal.name}")
+            Text("not before: ${certificate.notBefore}")
+            Text("not after: ${certificate.notAfter}")
+        }
     }
 }
 
