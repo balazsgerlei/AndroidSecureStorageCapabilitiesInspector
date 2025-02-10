@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -18,16 +19,16 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Dangerous
 import androidx.compose.material.icons.filled.DeviceUnknown
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheetDefaults.properties
 import androidx.compose.material3.MultiChoiceSegmentedButtonRow
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.SegmentedButton
@@ -63,12 +64,12 @@ class MainActivity : AppCompatActivity() {
             SecureStorageCapabilitiesInspectorTheme {
                 val deviceInfoState = viewModel.deviceInfo.observeAsState()
                 val secureStorageCapabilitiesState = viewModel.secureStorageCapabilities.observeAsState()
-                val shouldShowDialog = remember { mutableStateOf(false) }
+                val certificateToDisplayInDialog = remember { mutableStateOf<Certificate?>(null) }
 
                 SecureStorageCapabilitiesDisplayScreen(
                     deviceInfoState = deviceInfoState.value,
                     secureStorageCapabilitiesState = secureStorageCapabilitiesState.value,
-                    shouldShowDialog = shouldShowDialog,
+                    certificateToDisplayInDialog = certificateToDisplayInDialog,
                     modifier = Modifier.fillMaxSize(),
                 )
             }
@@ -87,7 +88,7 @@ class MainActivity : AppCompatActivity() {
 fun SecureStorageCapabilitiesDisplayScreen(
     deviceInfoState: DeviceInfo?,
     secureStorageCapabilitiesState: SecureStorageCapabilities?,
-    shouldShowDialog: MutableState<Boolean>,
+    certificateToDisplayInDialog: MutableState<Certificate?>,
     modifier: Modifier = Modifier
 ) {
     Surface(
@@ -101,7 +102,7 @@ fun SecureStorageCapabilitiesDisplayScreen(
             )
             SecureStorageCapabilitiesDisplay(
                 state = secureStorageCapabilitiesState,
-                shouldShowDialog = shouldShowDialog,
+                certificateToDisplayInDialog = certificateToDisplayInDialog,
                 modifier = Modifier.fillMaxSize(),
             )
         }
@@ -140,7 +141,7 @@ fun DeviceInfoDisplay(
 @Composable
 fun SecureStorageCapabilitiesDisplay(
     state: SecureStorageCapabilities?,
-    shouldShowDialog: MutableState<Boolean>,
+    certificateToDisplayInDialog: MutableState<Certificate?>,
     modifier: Modifier = Modifier
 ) {
     // We show the key with the higher security level initially
@@ -217,7 +218,7 @@ fun SecureStorageCapabilitiesDisplay(
                 KeySecurityDisplay(
                     state = secureStorageCapabilitiesToDisplay,
                     biometricEnrollmentStatus = state.biometricEnrollmentStatus,
-                    shouldShowDialog = shouldShowDialog,
+                    certificateToDisplayInDialog = certificateToDisplayInDialog,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
             }
@@ -345,7 +346,7 @@ fun HasStrongboxKeystoreDisplay(
 fun KeySecurityDisplay(
     state: KeySecureStorageCapabilities,
     biometricEnrollmentStatus: BiometricEnrollmentStatus,
-    shouldShowDialog: MutableState<Boolean>,
+    certificateToDisplayInDialog: MutableState<Certificate?>,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -368,7 +369,7 @@ fun KeySecurityDisplay(
             )
             CertificateChainDisplay(
                 certificateChain = state.certificateChain,
-                shouldShowDialog = shouldShowDialog,
+                certificateToDisplayInDialog = certificateToDisplayInDialog,
                 modifier = Modifier
                     .padding(horizontal = 8.dp),
             )
@@ -505,7 +506,7 @@ fun UserAuthenticationRequirementEnforcementDisplay(
 @Composable
 fun CertificateChainDisplay(
     certificateChain: Array<Certificate>?,
-    shouldShowDialog: MutableState<Boolean>,
+    certificateToDisplayInDialog: MutableState<Certificate?>,
     modifier: Modifier = Modifier,
 ) {
     if (certificateChain != null) {
@@ -513,27 +514,17 @@ fun CertificateChainDisplay(
             modifier = modifier,
         ) {
             certificateChain.forEach { certificate ->
-                (certificate as? X509Certificate)?.let { CertificateDisplay(it) }
-            }
-        }
-        Button(
-            modifier = modifier,
-            enabled = !shouldShowDialog.value,
-            onClick = {
-                shouldShowDialog.value = true
-            }
-        ) {
-            Text("Show Full Certificate Chain")
-        }
-        if (shouldShowDialog.value) {
-            val certificateChainString = buildString {
-                certificateChain.forEachIndexed { index, certificate ->
-                    append(certificate.toString())
-                    if (index != certificateChain.lastIndex) {
-                        append("\n-------------------------------------------------------\n\n")
-                    }
+                (certificate as? X509Certificate)?.let { x509Certificate ->
+                    CertificateDisplay(
+                        certificate = x509Certificate,
+                        onCertificateClick = {
+                            certificateToDisplayInDialog.value = it
+                        }
+                    )
                 }
             }
+        }
+        certificateToDisplayInDialog.value?.let {
             AlertDialog(
                 modifier = Modifier.fillMaxWidth()
                     .padding(16.dp),
@@ -541,12 +532,12 @@ fun CertificateChainDisplay(
                     usePlatformDefaultWidth = false
                 ),
                 onDismissRequest = {
-                    shouldShowDialog.value = false
+                    certificateToDisplayInDialog.value = null
                 },
-                title = { Text(text = "Certificate Chain") },
+                title = { Text(text = "Certificate Details") },
                 text = {
                     Text(
-                        text = certificateChainString,
+                        text = certificateToDisplayInDialog.value.toString(),
                         modifier = Modifier
                             .verticalScroll(rememberScrollState())
                     )
@@ -554,7 +545,7 @@ fun CertificateChainDisplay(
                 confirmButton = {
                     Button(
                         onClick = {
-                            shouldShowDialog.value = false
+                            certificateToDisplayInDialog.value = null
                         }
                     ) {
                         Text("Close")
@@ -573,17 +564,35 @@ fun CertificateChainDisplay(
 @Composable
 fun CertificateDisplay(
     certificate: X509Certificate,
+    onCertificateClick: (Certificate) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     OutlinedCard (
-        modifier = modifier.padding(bottom = 8.dp)
+        onClick = {
+            onCertificateClick(certificate)
+        },
+        modifier = modifier.padding(bottom = 8.dp),
     ) {
-        Column (
+        Row (
+            verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(8.dp)
         ) {
-            Text("subject: ${certificate.subjectX500Principal.name}")
-            Text("not before: ${certificate.notBefore}")
-            Text("not after: ${certificate.notAfter}")
+            Column (
+                modifier = Modifier
+                    .padding(8.dp)
+                    .weight(1f)
+            ) {
+                Text("subject: ${certificate.subjectX500Principal.name}")
+                Text("not before: ${certificate.notBefore}")
+                Text("not after: ${certificate.notAfter}")
+            }
+            Icon(
+                Icons.Outlined.Info,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(40.dp)
+                    .padding(end = 8.dp)
+            )
         }
     }
 }
@@ -591,7 +600,7 @@ fun CertificateDisplay(
 @Preview(showBackground = true)
 @Composable
 fun SecureStorageCapabilitiesDisplayScreenPreview() {
-    val shouldShowDialog = remember { mutableStateOf(false) }
+    val certificateToDisplayInDialog = remember { mutableStateOf<Certificate?>(null) }
 
     SecureStorageCapabilitiesInspectorTheme {
         SecureStorageCapabilitiesDisplayScreen(
@@ -625,7 +634,7 @@ fun SecureStorageCapabilitiesDisplayScreenPreview() {
                     isUserAuthenticationRequirementEnforcedBySecureHardware = true,
                 ),
             ),
-            shouldShowDialog = shouldShowDialog,
+            certificateToDisplayInDialog = certificateToDisplayInDialog,
             modifier = Modifier.fillMaxSize())
     }
 }
@@ -653,7 +662,7 @@ fun DeviceInfoDisplayPreview() {
 @Preview(showBackground = true)
 @Composable
 fun KeySecurityDisplayPreview() {
-    val shouldShowDialog = remember { mutableStateOf(false) }
+    val certificateToDisplayInDialog = remember { mutableStateOf<Certificate?>(null) }
 
     SecureStorageCapabilitiesInspectorTheme {
         Surface(
@@ -667,7 +676,7 @@ fun KeySecurityDisplayPreview() {
                     isUserAuthenticationRequirementEnforcedBySecureHardware = true,
                 ),
                 biometricEnrollmentStatus = BiometricEnrollmentStatus.ENROLLED,
-                shouldShowDialog = shouldShowDialog,
+                certificateToDisplayInDialog = certificateToDisplayInDialog,
             )
         }
     }
@@ -676,7 +685,7 @@ fun KeySecurityDisplayPreview() {
 @Preview(showBackground = true)
 @Composable
 fun CertificateChainDisplayPreview() {
-    val shouldShowDialog = remember { mutableStateOf(false) }
+    val certificateToDisplayInDialog = remember { mutableStateOf<Certificate?>(null) }
 
     SecureStorageCapabilitiesInspectorTheme {
         Surface(
@@ -684,7 +693,7 @@ fun CertificateChainDisplayPreview() {
         ) {
             CertificateChainDisplay(
                 certificateChain = null,
-                shouldShowDialog = shouldShowDialog,
+                certificateToDisplayInDialog = certificateToDisplayInDialog,
             )
         }
     }
@@ -693,7 +702,7 @@ fun CertificateChainDisplayPreview() {
 @Preview(showBackground = true)
 @Composable
 fun SecureStorageCapabilitiesDisplayPreview() {
-    val shouldShowDialog = remember { mutableStateOf(false) }
+    val certificateToDisplayInDialog = remember { mutableStateOf<Certificate?>(null) }
 
     SecureStorageCapabilitiesInspectorTheme {
         SecureStorageCapabilitiesDisplay(
@@ -720,7 +729,7 @@ fun SecureStorageCapabilitiesDisplayPreview() {
                     isUserAuthenticationRequirementEnforcedBySecureHardware = true,
                 ),
             ),
-            shouldShowDialog = shouldShowDialog,
+            certificateToDisplayInDialog = certificateToDisplayInDialog,
         )
     }
 }
