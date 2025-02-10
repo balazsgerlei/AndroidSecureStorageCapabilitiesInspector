@@ -31,7 +31,8 @@ data class SecureStorageCapabilities (
     val strongBoxKeystoreProperties: StrongBoxKeystoreProperties?,
     val rsa256KeySecureStorageCapabilities: KeySecureStorageCapabilities,
     val rsa512KeySecureStorageCapabilities: KeySecureStorageCapabilities,
-    val ecKeySecureStorageCapabilities: KeySecureStorageCapabilities,
+    val ec256KeySecureStorageCapabilities: KeySecureStorageCapabilities,
+    val ec512KeySecureStorageCapabilities: KeySecureStorageCapabilities,
     val aesKeySecureStorageCapabilities: KeySecureStorageCapabilities,
 )
 

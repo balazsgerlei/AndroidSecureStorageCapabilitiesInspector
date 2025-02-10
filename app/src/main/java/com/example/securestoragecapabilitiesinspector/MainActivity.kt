@@ -36,12 +36,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -140,24 +137,6 @@ fun SecureStorageCapabilitiesDisplay(
     certificateToDisplayInDialog: MutableState<Certificate?>,
     modifier: Modifier = Modifier
 ) {
-    // We show the key with the higher security level initially
-    // As we are most interested in the highest capability of the device
-    // If security equals, we default to show RSA
-    val aesKeySecureStorageCapabilities = state?.aesKeySecureStorageCapabilities
-    val rsaKeySecureStorageCapabilities = state?.rsa256KeySecureStorageCapabilities
-    val ecKeySecureStorageCapabilities = state?.ecKeySecureStorageCapabilities
-    val keySecurityEquals =
-        aesKeySecureStorageCapabilities?.isKeyGenerationInsideSecureHardware == rsaKeySecureStorageCapabilities?.isKeyGenerationInsideSecureHardware
-                && rsaKeySecureStorageCapabilities?.isKeyGenerationInsideSecureHardware == ecKeySecureStorageCapabilities?.isKeyGenerationInsideSecureHardware
-                && aesKeySecureStorageCapabilities?.isUserAuthenticationRequirementEnforcedBySecureHardware == rsaKeySecureStorageCapabilities?.isUserAuthenticationRequirementEnforcedBySecureHardware
-                && rsaKeySecureStorageCapabilities?.isUserAuthenticationRequirementEnforcedBySecureHardware == ecKeySecureStorageCapabilities?.isUserAuthenticationRequirementEnforcedBySecureHardware
-    val moreSecureKeyVariant =
-        if (keySecurityEquals || (rsaKeySecureStorageCapabilities?.isKeyGenerationInsideSecureHardware == true
-            && rsaKeySecureStorageCapabilities.isUserAuthenticationRequirementEnforcedBySecureHardware)) 0
-        else if (ecKeySecureStorageCapabilities?.isKeyGenerationInsideSecureHardware == true
-            && ecKeySecureStorageCapabilities.isUserAuthenticationRequirementEnforcedBySecureHardware) 1
-        else 2
-
     if (state != null) {
         Column(
             modifier = modifier
@@ -207,7 +186,17 @@ fun SecureStorageCapabilitiesDisplay(
                 modifier = Modifier.padding(bottom = 8.dp)
             ) {
                 KeySecurityDisplay(
-                    state = state.ecKeySecureStorageCapabilities,
+                    state = state.ec256KeySecureStorageCapabilities,
+                    biometricEnrollmentStatus = state.biometricEnrollmentStatus,
+                    certificateToDisplayInDialog = certificateToDisplayInDialog,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+            }
+            OutlinedCard (
+                modifier = Modifier.padding(bottom = 8.dp)
+            ) {
+                KeySecurityDisplay(
+                    state = state.ec512KeySecureStorageCapabilities,
                     biometricEnrollmentStatus = state.biometricEnrollmentStatus,
                     certificateToDisplayInDialog = certificateToDisplayInDialog,
                     modifier = Modifier.padding(bottom = 8.dp)
@@ -660,8 +649,15 @@ fun SecureStorageCapabilitiesDisplayScreenPreview() {
                     keyGenerationSecurityLevel = KeyGenerationSecurityLevel.STRONGBOX,
                     isUserAuthenticationRequirementEnforcedBySecureHardware = true,
                 ),
-                ecKeySecureStorageCapabilities = KeySecureStorageCapabilities(
-                    keyAlgorithm = "AC",
+                ec256KeySecureStorageCapabilities = KeySecureStorageCapabilities(
+                    keyAlgorithm = "EC with SHA-256",
+                    keyGenerationSuccessful = true,
+                    isKeyGenerationInsideSecureHardware = true,
+                    keyGenerationSecurityLevel = KeyGenerationSecurityLevel.STRONGBOX,
+                    isUserAuthenticationRequirementEnforcedBySecureHardware = true,
+                ),
+                ec512KeySecureStorageCapabilities = KeySecureStorageCapabilities(
+                    keyAlgorithm = "EC with SHA-512",
                     keyGenerationSuccessful = true,
                     isKeyGenerationInsideSecureHardware = true,
                     keyGenerationSecurityLevel = KeyGenerationSecurityLevel.STRONGBOX,
@@ -766,8 +762,15 @@ fun SecureStorageCapabilitiesDisplayPreview() {
                     keyGenerationSecurityLevel = KeyGenerationSecurityLevel.STRONGBOX,
                     isUserAuthenticationRequirementEnforcedBySecureHardware = true,
                 ),
-                ecKeySecureStorageCapabilities = KeySecureStorageCapabilities(
-                    keyAlgorithm = "EC",
+                ec256KeySecureStorageCapabilities = KeySecureStorageCapabilities(
+                    keyAlgorithm = "EC with SHA-256",
+                    keyGenerationSuccessful = true,
+                    isKeyGenerationInsideSecureHardware = true,
+                    keyGenerationSecurityLevel = KeyGenerationSecurityLevel.STRONGBOX,
+                    isUserAuthenticationRequirementEnforcedBySecureHardware = true,
+                ),
+                ec512KeySecureStorageCapabilities = KeySecureStorageCapabilities(
+                    keyAlgorithm = "EC with SHA-512",
                     keyGenerationSuccessful = true,
                     isKeyGenerationInsideSecureHardware = true,
                     keyGenerationSecurityLevel = KeyGenerationSecurityLevel.STRONGBOX,

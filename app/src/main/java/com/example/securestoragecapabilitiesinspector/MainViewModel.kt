@@ -21,7 +21,6 @@ import java.security.KeyFactory
 import java.security.KeyPair
 import java.security.KeyPairGenerator
 import java.security.KeyStore
-import java.security.KeyStoreException
 import java.security.PrivateKey
 import java.security.ProviderException
 import java.security.cert.X509Certificate
@@ -81,17 +80,24 @@ class MainViewModel: ViewModel()  {
                 shouldUseStrongBox = canUseStrongBoxForKeyGeneration,
                 requireUserAuthentication = canRequireUserAuthentication,
                 digest = KeyProperties.DIGEST_SHA512)?.private
-            val sampleECKey = generateSampleECKeyPair(
+            val sampleEC256Key = generateSampleECKeyPair(
                 shouldUseStrongBox = canUseStrongBoxForKeyGeneration,
-                requireUserAuthentication = canRequireUserAuthentication)?.private
+                requireUserAuthentication = canRequireUserAuthentication,
+                digest = KeyProperties.DIGEST_SHA256)?.private
+            val sampleEC512Key = generateSampleECKeyPair(
+                shouldUseStrongBox = canUseStrongBoxForKeyGeneration,
+                requireUserAuthentication = canRequireUserAuthentication,
+                digest = KeyProperties.DIGEST_SHA512)?.private
 
             val sampleAESKeyInfo = getKeyInfoForAESKey(sampleAESKey)
             val sampleRSA256KeyInfo = getKeyInfoForRSAKey(sampleRSA256Key)
             val sampleRSA512KeyInfo = getKeyInfoForRSAKey(sampleRSA512Key)
-            val sampleECKeyInfo = getKeyInfoForECKey(sampleECKey)
+            val sampleEC256KeyInfo = getKeyInfoForECKey(sampleEC256Key)
+            val sampleEC512KeyInfo = getKeyInfoForECKey(sampleEC512Key)
             val rsa256KeyCertificateChain: List<Certificate>? = certificateChainForKeyInfo(sampleRSA256KeyInfo, keyStore)
             val rsa512KeyCertificateChain: List<Certificate>? = certificateChainForKeyInfo(sampleRSA512KeyInfo, keyStore)
-            val ecKeyCertificateChain: List<Certificate>? = certificateChainForKeyInfo(sampleECKeyInfo, keyStore)
+            val ec256KeyCertificateChain: List<Certificate>? = certificateChainForKeyInfo(sampleEC256KeyInfo, keyStore)
+            val ec512KeyCertificateChain: List<Certificate>? = certificateChainForKeyInfo(sampleEC512KeyInfo, keyStore)
 
             val secureStorageCapabilitiesResult = SecureStorageCapabilities(
                 isDeviceSecure,
@@ -113,13 +119,21 @@ class MainViewModel: ViewModel()  {
                     isUserAuthenticationRequirementEnforcedBySecureHardware = sampleRSA512KeyInfo?.isUserAuthenticationRequirementEnforcedBySecureHardware ?: false,
                     certificateChain = rsa512KeyCertificateChain,
                 ),
-                ecKeySecureStorageCapabilities = KeySecureStorageCapabilities(
-                    keyAlgorithm = "EC",
-                    keyGenerationSuccessful = sampleECKey != null && sampleECKeyInfo != null,
-                    isKeyGenerationInsideSecureHardware = sampleECKeyInfo?.isInsideSecureHardware ?: false,
-                    keyGenerationSecurityLevel = keyGenerationSecurityLevelFromKeyInfo(sampleECKeyInfo),
-                    isUserAuthenticationRequirementEnforcedBySecureHardware = sampleECKeyInfo?.isUserAuthenticationRequirementEnforcedBySecureHardware ?: false,
-                    certificateChain = ecKeyCertificateChain,
+                ec256KeySecureStorageCapabilities = KeySecureStorageCapabilities(
+                    keyAlgorithm = "EC with SHA-256",
+                    keyGenerationSuccessful = sampleEC256Key != null && sampleEC256KeyInfo != null,
+                    isKeyGenerationInsideSecureHardware = sampleEC256KeyInfo?.isInsideSecureHardware ?: false,
+                    keyGenerationSecurityLevel = keyGenerationSecurityLevelFromKeyInfo(sampleEC256KeyInfo),
+                    isUserAuthenticationRequirementEnforcedBySecureHardware = sampleEC256KeyInfo?.isUserAuthenticationRequirementEnforcedBySecureHardware ?: false,
+                    certificateChain = ec256KeyCertificateChain,
+                ),
+                ec512KeySecureStorageCapabilities = KeySecureStorageCapabilities(
+                    keyAlgorithm = "EC with SHA-512",
+                    keyGenerationSuccessful = sampleEC512Key != null && sampleEC512KeyInfo != null,
+                    isKeyGenerationInsideSecureHardware = sampleEC512KeyInfo?.isInsideSecureHardware ?: false,
+                    keyGenerationSecurityLevel = keyGenerationSecurityLevelFromKeyInfo(sampleEC512KeyInfo),
+                    isUserAuthenticationRequirementEnforcedBySecureHardware = sampleEC512KeyInfo?.isUserAuthenticationRequirementEnforcedBySecureHardware ?: false,
+                    certificateChain = ec512KeyCertificateChain,
                 ),
                 aesKeySecureStorageCapabilities = KeySecureStorageCapabilities(
                     keyAlgorithm = "AES",
