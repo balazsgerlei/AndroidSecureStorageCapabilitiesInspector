@@ -5,13 +5,11 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -21,7 +19,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Dangerous
 import androidx.compose.material.icons.filled.DeviceUnknown
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Lock
@@ -32,10 +29,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MultiChoiceSegmentedButtonRow
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.SegmentedButton
@@ -57,9 +52,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import com.example.securestoragecapabilitiesinspector.ui.theme.SecureStorageCapabilitiesInspectorTheme
-import java.lang.StringBuilder
-import java.security.cert.Certificate
-import java.security.cert.X509Certificate
 
 class MainActivity : AppCompatActivity() {
 
@@ -512,7 +504,7 @@ fun UserAuthenticationRequirementEnforcementDisplay(
 
 @Composable
 fun CertificateChainDisplay(
-    certificateChain: Array<Certificate>?,
+    certificateChain: List<Certificate>?,
     certificateToDisplayInDialog: MutableState<Certificate?>,
     modifier: Modifier = Modifier,
 ) {
@@ -547,14 +539,12 @@ fun CertificateChainDisplay(
             }
             if(showCertificateChain.value) {
                 certificateChain.forEach { certificate ->
-                    (certificate as? X509Certificate)?.let { x509Certificate ->
-                        CertificateDisplay(
-                            certificate = x509Certificate,
-                            onCertificateClick = {
-                                certificateToDisplayInDialog.value = it
-                            }
-                        )
-                    }
+                    CertificateDisplay(
+                        certificate,
+                        onCertificateClick = {
+                            certificateToDisplayInDialog.value = it
+                        }
+                    )
                 }
             }
         }
@@ -599,7 +589,7 @@ fun CertificateChainDisplay(
 
 @Composable
 fun CertificateDisplay(
-    certificate: X509Certificate,
+    certificate: Certificate,
     onCertificateClick: (Certificate) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -618,7 +608,7 @@ fun CertificateDisplay(
                     .padding(8.dp)
                     .weight(1f)
             ) {
-                Text("subject: ${certificate.subjectX500Principal.name}")
+                Text("subject: ${certificate.subject}")
                 Text("not before: ${certificate.notBefore}")
                 Text("not after: ${certificate.notAfter}")
             }
