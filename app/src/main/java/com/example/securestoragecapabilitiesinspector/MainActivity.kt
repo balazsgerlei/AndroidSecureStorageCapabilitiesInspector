@@ -28,12 +28,15 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedIconButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.livedata.observeAsState
@@ -62,8 +65,7 @@ class MainActivity : AppCompatActivity() {
                 SecureStorageCapabilitiesDisplayScreen(
                     deviceInfoState = deviceInfoState.value,
                     secureStorageCapabilitiesState = secureStorageCapabilitiesState.value,
-                    certificateToDisplayInDialog = certificateToDisplayInDialog,
-                    modifier = Modifier.fillMaxSize(),
+                    certificateToDisplayInDialog = certificateToDisplayInDialog
                 )
             }
         }
@@ -77,57 +79,30 @@ class MainActivity : AppCompatActivity() {
 
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SecureStorageCapabilitiesDisplayScreen(
     deviceInfoState: DeviceInfo?,
     secureStorageCapabilitiesState: SecureStorageCapabilities?,
-    certificateToDisplayInDialog: MutableState<Certificate?>,
-    modifier: Modifier = Modifier
+    certificateToDisplayInDialog: MutableState<Certificate?>
 ) {
-    Surface(
-        color = MaterialTheme.colorScheme.background
-    ) {
-        Column(
-            modifier = modifier
-        ) {
-            DeviceInfoDisplay(
-                state = deviceInfoState,
-            )
-            SecureStorageCapabilitiesDisplay(
-                state = secureStorageCapabilitiesState,
-                certificateToDisplayInDialog = certificateToDisplayInDialog,
-                modifier = Modifier.fillMaxSize(),
+    Scaffold (
+        topBar = {
+            TopAppBar(
+                title = {
+                    Column {
+                        Text("${deviceInfoState?.deviceBrand} ${deviceInfoState?.deviceName} (${deviceInfoState?.deviceModel})")
+                        Text("Android ${deviceInfoState?.androidVersion} (API ${deviceInfoState?.androidApiLevel})")
+                    }
+                },
             )
         }
-    }
-}
-
-@Composable
-fun DeviceInfoDisplay(
-    state: DeviceInfo?,
-    modifier: Modifier = Modifier
-) {
-    if (state != null) {
-        Column (
-            modifier = modifier
-                .padding(start = 8.dp, top = 16.dp, end = 8.dp, bottom = 8.dp)
-                .fillMaxWidth(),
-        ) {
-            Text(
-                text = "${state.deviceBrand} ${state.deviceName} (${state.deviceModel})",
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier
-                    .padding(start = 8.dp, end = 8.dp, bottom = 2.dp)
-                    .fillMaxWidth(),
-            )
-            Text(
-                text = "Android ${state.androidVersion} (API ${state.androidApiLevel})",
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier
-                    .padding(horizontal = 8.dp)
-                    .fillMaxWidth(),
-            )
-        }
+    ) { innerPadding ->
+        SecureStorageCapabilitiesDisplay(
+            state = secureStorageCapabilitiesState,
+            certificateToDisplayInDialog = certificateToDisplayInDialog,
+            modifier = Modifier.padding(innerPadding),
+        )
     }
 }
 
@@ -140,7 +115,7 @@ fun SecureStorageCapabilitiesDisplay(
     if (state != null) {
         Column(
             modifier = modifier
-                .padding(start = 8.dp, end = 8.dp, bottom = 8.dp)
+                .padding(start = 8.dp, top = 8.dp, end = 8.dp, bottom = 8.dp)
                 .verticalScroll(rememberScrollState())
         ) {
             DeviceSecureDisplay(
@@ -677,28 +652,8 @@ fun SecureStorageCapabilitiesDisplayScreenPreview() {
                     isUserAuthenticationRequirementEnforcedBySecureHardware = true,
                 ),
             ),
-            certificateToDisplayInDialog = certificateToDisplayInDialog,
-            modifier = Modifier.fillMaxSize())
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun DeviceInfoDisplayPreview() {
-    SecureStorageCapabilitiesInspectorTheme {
-        Surface(
-            color = MaterialTheme.colorScheme.background
-        ) {
-            DeviceInfoDisplay(
-                state = DeviceInfo(
-                    deviceName = "Pixel 8 Pro",
-                    deviceBrand = "Google",
-                    deviceModel = "husky",
-                    androidVersion = "14",
-                    androidApiLevel = 34,
-                ),
-            )
-        }
+            certificateToDisplayInDialog = certificateToDisplayInDialog
+        )
     }
 }
 
