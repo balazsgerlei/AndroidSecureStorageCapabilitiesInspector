@@ -524,7 +524,7 @@ fun CertificateChainDisplay(
         ) {
             Row (
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(bottom = 8.dp)
+                modifier = Modifier.padding(bottom = 8.dp, end = 8.dp)
             ) {
                 Text(
                     "Certificate Chain",
@@ -536,7 +536,8 @@ fun CertificateChainDisplay(
                     onClick = {
                         showCertificateChain.value = !showCertificateChain.value
                     },
-                    modifier = Modifier.size(44.dp)
+                    modifier = Modifier
+                        .size(44.dp)
                 ) {
                     Icon(
                         imageVector = if (showCertificateChain.value) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
@@ -610,7 +611,7 @@ fun CertificateDisplay(
     ) {
         Row (
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(8.dp)
+            modifier = Modifier.padding(start = 8.dp, top = 8.dp, end = 16.dp, bottom = 8.dp)
         ) {
             Column (
                 modifier = Modifier
@@ -625,8 +626,7 @@ fun CertificateDisplay(
                 Icons.Outlined.Info,
                 contentDescription = null,
                 modifier = Modifier
-                    .size(40.dp)
-                    .padding(end = 8.dp)
+                    .size(32.dp)
             )
         }
     }
