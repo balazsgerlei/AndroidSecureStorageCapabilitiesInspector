@@ -16,7 +16,6 @@ import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.math.BigInteger
 import java.security.Key
 import java.security.KeyFactory
 import java.security.KeyPair
@@ -24,13 +23,12 @@ import java.security.KeyPairGenerator
 import java.security.KeyStore
 import java.security.PrivateKey
 import java.security.ProviderException
-import java.security.cert.Certificate
+import java.security.cert.X509Certificate
 import java.util.Calendar
 import java.util.GregorianCalendar
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.SecretKeyFactory
-import javax.security.auth.x500.X500Principal
 
 private const val ANDROID_KEYSTORE = "AndroidKeyStore"
 private const val SAMPLE_AES_KEY_ALIAS = "sample_aes_key"
@@ -84,8 +82,8 @@ class MainViewModel: ViewModel()  {
             val sampleAESKeyInfo = getKeyInfoForAESKey(sampleAESKey)
             val sampleRSAKeyInfo = getKeyInfoForRSAKey(sampleRSAKey)
             val sampleECKeyInfo = getKeyInfoForECKey(sampleECKey)
-            val rsaKeyCertificateChain: Array<Certificate>? = keyStore.getCertificateChain(sampleRSAKeyInfo?.keystoreAlias)
-            val ecKeyCertificateChain: Array<Certificate>? = keyStore.getCertificateChain(sampleECKeyInfo?.keystoreAlias)
+            val rsaKeyCertificateChain: List<Certificate>? = certificateChainForKeyInfo(sampleRSAKeyInfo, keyStore)
+            val ecKeyCertificateChain: List<Certificate>? = certificateChainForKeyInfo(sampleECKeyInfo, keyStore)
 
             val secureStorageCapabilitiesResult = SecureStorageCapabilities(
                 isDeviceSecure,
@@ -179,6 +177,18 @@ class MainViewModel: ViewModel()  {
 
     private fun getKeyInfoForECKey(key: Key?) = key?.let {
         getKeyInfoForAsymmetricPrivateKey(it as PrivateKey)
+    }
+
+    private fun certificateChainForKeyInfo(keyInfo: KeyInfo?, keyStore: KeyStore): List<Certificate>? = keyInfo?.let {
+        keyStore.getCertificateChain(keyInfo.keystoreAlias).map { certificate ->
+            val x509Certificate = certificate as X509Certificate
+            Certificate(
+                subject = x509Certificate.subjectX500Principal.name,
+                notBefore = x509Certificate.notBefore,
+                notAfter = x509Certificate.notAfter,
+                stringRepresentation = certificate.toString()
+            )
+        }
     }
 
     private fun keyGenerationSecurityLevelFromKeyInfo(keyInfo: KeyInfo?) = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {

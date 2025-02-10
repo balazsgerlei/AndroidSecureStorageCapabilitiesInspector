@@ -1,6 +1,6 @@
 package com.example.securestoragecapabilitiesinspector
 
-import java.security.cert.Certificate
+import java.util.Date
 
 enum class BiometricEnrollmentStatus {
     ENROLLED,
@@ -39,32 +39,16 @@ data class KeySecureStorageCapabilities (
     val isKeyGenerationInsideSecureHardware: Boolean,
     val keyGenerationSecurityLevel: KeyGenerationSecurityLevel?,
     val isUserAuthenticationRequirementEnforcedBySecureHardware: Boolean,
-    val certificateChain: Array<Certificate>? = null,
+    val certificateChain: List<Certificate>? = null,
+)
+
+data class Certificate (
+    val subject: String,
+    val notBefore: Date,
+    val notAfter: Date,
+    val stringRepresentation: String,
 ) {
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as KeySecureStorageCapabilities
-
-        if (keyGenerationSuccessful != other.keyGenerationSuccessful) return false
-        if (isKeyGenerationInsideSecureHardware != other.isKeyGenerationInsideSecureHardware) return false
-        if (keyGenerationSecurityLevel != other.keyGenerationSecurityLevel) return false
-        if (isUserAuthenticationRequirementEnforcedBySecureHardware != other.isUserAuthenticationRequirementEnforcedBySecureHardware) return false
-        if (certificateChain != null) {
-            if (other.certificateChain == null) return false
-            if (!certificateChain.contentEquals(other.certificateChain)) return false
-        } else if (other.certificateChain != null) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = keyGenerationSuccessful.hashCode()
-        result = 31 * result + isKeyGenerationInsideSecureHardware.hashCode()
-        result = 31 * result + (keyGenerationSecurityLevel?.hashCode() ?: 0)
-        result = 31 * result + isUserAuthenticationRequirementEnforcedBySecureHardware.hashCode()
-        result = 31 * result + (certificateChain?.contentHashCode() ?: 0)
-        return result
+    override fun toString(): String {
+        return stringRepresentation
     }
 }
