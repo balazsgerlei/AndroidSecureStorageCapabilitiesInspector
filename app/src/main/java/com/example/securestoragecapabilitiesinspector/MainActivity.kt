@@ -144,7 +144,7 @@ fun SecureStorageCapabilitiesDisplay(
     // As we are most interested in the highest capability of the device
     // If security equals, we default to show RSA
     val aesKeySecureStorageCapabilities = state?.aesKeySecureStorageCapabilities
-    val rsaKeySecureStorageCapabilities = state?.rsaKeySecureStorageCapabilities
+    val rsaKeySecureStorageCapabilities = state?.rsa256KeySecureStorageCapabilities
     val ecKeySecureStorageCapabilities = state?.ecKeySecureStorageCapabilities
     val keySecurityEquals =
         aesKeySecureStorageCapabilities?.isKeyGenerationInsideSecureHardware == rsaKeySecureStorageCapabilities?.isKeyGenerationInsideSecureHardware
@@ -187,7 +187,17 @@ fun SecureStorageCapabilitiesDisplay(
                 modifier = Modifier.padding(bottom = 8.dp)
             ) {
                 KeySecurityDisplay(
-                    state = state.rsaKeySecureStorageCapabilities,
+                    state = state.rsa256KeySecureStorageCapabilities,
+                    biometricEnrollmentStatus = state.biometricEnrollmentStatus,
+                    certificateToDisplayInDialog = certificateToDisplayInDialog,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+            }
+            OutlinedCard (
+                modifier = Modifier.padding(bottom = 8.dp)
+            ) {
+                KeySecurityDisplay(
+                    state = state.rsa512KeySecureStorageCapabilities,
                     biometricEnrollmentStatus = state.biometricEnrollmentStatus,
                     certificateToDisplayInDialog = certificateToDisplayInDialog,
                     modifier = Modifier.padding(bottom = 8.dp)
@@ -636,8 +646,15 @@ fun SecureStorageCapabilitiesDisplayScreenPreview() {
                 isDeviceSecure = true,
                 biometricEnrollmentStatus = BiometricEnrollmentStatus.ENROLLED,
                 strongBoxKeystoreProperties = StrongBoxKeystoreProperties.V100,
-                rsaKeySecureStorageCapabilities = KeySecureStorageCapabilities(
-                    keyAlgorithm = "RSA",
+                rsa256KeySecureStorageCapabilities = KeySecureStorageCapabilities(
+                    keyAlgorithm = "RSA with SHA-256",
+                    keyGenerationSuccessful = true,
+                    isKeyGenerationInsideSecureHardware = true,
+                    keyGenerationSecurityLevel = KeyGenerationSecurityLevel.STRONGBOX,
+                    isUserAuthenticationRequirementEnforcedBySecureHardware = true,
+                ),
+                rsa512KeySecureStorageCapabilities = KeySecureStorageCapabilities(
+                    keyAlgorithm = "RSA with SHA-512",
                     keyGenerationSuccessful = true,
                     isKeyGenerationInsideSecureHardware = true,
                     keyGenerationSecurityLevel = KeyGenerationSecurityLevel.STRONGBOX,
@@ -735,8 +752,15 @@ fun SecureStorageCapabilitiesDisplayPreview() {
                 isDeviceSecure = true,
                 biometricEnrollmentStatus = BiometricEnrollmentStatus.ENROLLED,
                 strongBoxKeystoreProperties = StrongBoxKeystoreProperties.V100,
-                rsaKeySecureStorageCapabilities = KeySecureStorageCapabilities(
-                    keyAlgorithm = "RSA",
+                rsa256KeySecureStorageCapabilities = KeySecureStorageCapabilities(
+                    keyAlgorithm = "RSA with SHA-256",
+                    keyGenerationSuccessful = true,
+                    isKeyGenerationInsideSecureHardware = true,
+                    keyGenerationSecurityLevel = KeyGenerationSecurityLevel.STRONGBOX,
+                    isUserAuthenticationRequirementEnforcedBySecureHardware = true,
+                ),
+                rsa512KeySecureStorageCapabilities = KeySecureStorageCapabilities(
+                    keyAlgorithm = "RSA with SHA-512",
                     keyGenerationSuccessful = true,
                     isKeyGenerationInsideSecureHardware = true,
                     keyGenerationSecurityLevel = KeyGenerationSecurityLevel.STRONGBOX,
