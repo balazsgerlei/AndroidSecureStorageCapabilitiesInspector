@@ -5,11 +5,13 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -20,6 +22,8 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Dangerous
 import androidx.compose.material.icons.filled.DeviceUnknown
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.outlined.Info
@@ -28,9 +32,12 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MultiChoiceSegmentedButtonRow
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.Surface
@@ -509,21 +516,48 @@ fun CertificateChainDisplay(
     certificateToDisplayInDialog: MutableState<Certificate?>,
     modifier: Modifier = Modifier,
 ) {
-    if (certificateChain != null) {
+    if (!certificateChain.isNullOrEmpty()) {
+        val showCertificateChain = remember { mutableStateOf(false) }
+
         Column (
             modifier = modifier,
         ) {
-            certificateChain.forEach { certificate ->
-                (certificate as? X509Certificate)?.let { x509Certificate ->
-                    CertificateDisplay(
-                        certificate = x509Certificate,
-                        onCertificateClick = {
-                            certificateToDisplayInDialog.value = it
-                        }
+            Row (
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(bottom = 8.dp)
+            ) {
+                Text(
+                    "Certificate Chain",
+                    modifier = Modifier
+                        .padding(horizontal = 8.dp)
+                        .weight(1f)
+                )
+                OutlinedIconButton (
+                    onClick = {
+                        showCertificateChain.value = !showCertificateChain.value
+                    },
+                    modifier = Modifier.size(44.dp)
+                ) {
+                    Icon(
+                        imageVector = if (showCertificateChain.value) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                        contentDescription = null
                     )
                 }
             }
+            if(showCertificateChain.value) {
+                certificateChain.forEach { certificate ->
+                    (certificate as? X509Certificate)?.let { x509Certificate ->
+                        CertificateDisplay(
+                            certificate = x509Certificate,
+                            onCertificateClick = {
+                                certificateToDisplayInDialog.value = it
+                            }
+                        )
+                    }
+                }
+            }
         }
+
         certificateToDisplayInDialog.value?.let {
             AlertDialog(
                 modifier = Modifier.fillMaxWidth()
@@ -556,7 +590,8 @@ fun CertificateChainDisplay(
     } else {
         Text(
             text = "No Certificate Chain",
-            modifier = modifier.padding(horizontal = 8.dp),
+            modifier = modifier
+                .padding(horizontal = 8.dp),
         )
     }
 }
