@@ -30,11 +30,8 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MultiChoiceSegmentedButtonRow
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedIconButton
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -160,8 +157,6 @@ fun SecureStorageCapabilitiesDisplay(
         else if (ecKeySecureStorageCapabilities?.isKeyGenerationInsideSecureHardware == true
             && ecKeySecureStorageCapabilities.isUserAuthenticationRequirementEnforcedBySecureHardware) 1
         else 2
-    var selectedKeyVariant by remember { mutableIntStateOf(moreSecureKeyVariant) }
-    val options = listOf("RSA", "EC", "AES")
 
     if (state != null) {
         Column(
@@ -188,34 +183,31 @@ fun SecureStorageCapabilitiesDisplay(
                     .padding(bottom = 16.dp),
             )
 
-            Card (
-                modifier = Modifier.fillMaxWidth()
+            OutlinedCard (
+                modifier = Modifier.padding(bottom = 8.dp)
             ) {
-                MultiChoiceSegmentedButtonRow(
-                    modifier = Modifier
-                        .align(Alignment.CenterHorizontally)
-                        .padding(top = 8.dp, bottom = 8.dp)
-                ) {
-                    options.forEachIndexed { index, label ->
-                        SegmentedButton(
-                            shape = SegmentedButtonDefaults.itemShape(index = index, count = options.size),
-                            onCheckedChange = {
-                                selectedKeyVariant = index
-                            },
-                            checked = index == selectedKeyVariant
-                        ) {
-                            Text(label)
-                        }
-                    }
-                }
-
-                val secureStorageCapabilitiesToDisplay = when(selectedKeyVariant) {
-                    0 -> state.rsaKeySecureStorageCapabilities
-                    1 -> state.ecKeySecureStorageCapabilities
-                    else -> state.aesKeySecureStorageCapabilities
-                }
                 KeySecurityDisplay(
-                    state = secureStorageCapabilitiesToDisplay,
+                    state = state.rsaKeySecureStorageCapabilities,
+                    biometricEnrollmentStatus = state.biometricEnrollmentStatus,
+                    certificateToDisplayInDialog = certificateToDisplayInDialog,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+            }
+            OutlinedCard (
+                modifier = Modifier.padding(bottom = 8.dp)
+            ) {
+                KeySecurityDisplay(
+                    state = state.ecKeySecureStorageCapabilities,
+                    biometricEnrollmentStatus = state.biometricEnrollmentStatus,
+                    certificateToDisplayInDialog = certificateToDisplayInDialog,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+            }
+            OutlinedCard (
+                modifier = Modifier.padding(bottom = 8.dp)
+            ) {
+                KeySecurityDisplay(
+                    state = state.aesKeySecureStorageCapabilities,
                     biometricEnrollmentStatus = state.biometricEnrollmentStatus,
                     certificateToDisplayInDialog = certificateToDisplayInDialog,
                     modifier = Modifier.padding(bottom = 8.dp)
@@ -349,8 +341,13 @@ fun KeySecurityDisplay(
     modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = modifier
+        modifier = modifier.padding(top = 8.dp)
     ) {
+        Text(
+            text = state.keyAlgorithm,
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.padding(start = 8.dp, top = 8.dp, end = 0.dp, bottom = 8.dp)
+        )
         if (state.keyGenerationSuccessful) {
             KeyGenerationSecurityLevelDisplay(
                 isKeyGenerationInsideSecureHardware = state.isKeyGenerationInsideSecureHardware,
@@ -381,7 +378,6 @@ fun KeySecurityDisplay(
             )
         }
     }
-
 }
 
 @Composable
@@ -593,7 +589,7 @@ fun CertificateDisplay(
     onCertificateClick: (Certificate) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    OutlinedCard (
+    Card (
         onClick = {
             onCertificateClick(certificate)
         },
@@ -641,18 +637,21 @@ fun SecureStorageCapabilitiesDisplayScreenPreview() {
                 biometricEnrollmentStatus = BiometricEnrollmentStatus.ENROLLED,
                 strongBoxKeystoreProperties = StrongBoxKeystoreProperties.V100,
                 rsaKeySecureStorageCapabilities = KeySecureStorageCapabilities(
+                    keyAlgorithm = "RSA",
                     keyGenerationSuccessful = true,
                     isKeyGenerationInsideSecureHardware = true,
                     keyGenerationSecurityLevel = KeyGenerationSecurityLevel.STRONGBOX,
                     isUserAuthenticationRequirementEnforcedBySecureHardware = true,
                 ),
                 ecKeySecureStorageCapabilities = KeySecureStorageCapabilities(
+                    keyAlgorithm = "AC",
                     keyGenerationSuccessful = true,
                     isKeyGenerationInsideSecureHardware = true,
                     keyGenerationSecurityLevel = KeyGenerationSecurityLevel.STRONGBOX,
                     isUserAuthenticationRequirementEnforcedBySecureHardware = true,
                 ),
                 aesKeySecureStorageCapabilities = KeySecureStorageCapabilities(
+                    keyAlgorithm = "AES",
                     keyGenerationSuccessful = true,
                     isKeyGenerationInsideSecureHardware = true,
                     keyGenerationSecurityLevel = KeyGenerationSecurityLevel.STRONGBOX,
@@ -695,6 +694,7 @@ fun KeySecurityDisplayPreview() {
         ) {
             KeySecurityDisplay(
                 state = KeySecureStorageCapabilities(
+                    keyAlgorithm = "RSA",
                     keyGenerationSuccessful = true,
                     isKeyGenerationInsideSecureHardware = true,
                     keyGenerationSecurityLevel = KeyGenerationSecurityLevel.STRONGBOX,
@@ -736,18 +736,21 @@ fun SecureStorageCapabilitiesDisplayPreview() {
                 biometricEnrollmentStatus = BiometricEnrollmentStatus.ENROLLED,
                 strongBoxKeystoreProperties = StrongBoxKeystoreProperties.V100,
                 rsaKeySecureStorageCapabilities = KeySecureStorageCapabilities(
+                    keyAlgorithm = "RSA",
                     keyGenerationSuccessful = true,
                     isKeyGenerationInsideSecureHardware = true,
                     keyGenerationSecurityLevel = KeyGenerationSecurityLevel.STRONGBOX,
                     isUserAuthenticationRequirementEnforcedBySecureHardware = true,
                 ),
                 ecKeySecureStorageCapabilities = KeySecureStorageCapabilities(
+                    keyAlgorithm = "EC",
                     keyGenerationSuccessful = true,
                     isKeyGenerationInsideSecureHardware = true,
                     keyGenerationSecurityLevel = KeyGenerationSecurityLevel.STRONGBOX,
                     isUserAuthenticationRequirementEnforcedBySecureHardware = true,
                 ),
                 aesKeySecureStorageCapabilities = KeySecureStorageCapabilities(
+                    keyAlgorithm = "AES",
                     keyGenerationSuccessful = true,
                     isKeyGenerationInsideSecureHardware = true,
                     keyGenerationSecurityLevel = KeyGenerationSecurityLevel.STRONGBOX,

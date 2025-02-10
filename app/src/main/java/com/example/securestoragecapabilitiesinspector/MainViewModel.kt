@@ -90,6 +90,7 @@ class MainViewModel: ViewModel()  {
                 biometricEnrollmentStatus,
                 strongBoxKeystoreProperties,
                 rsaKeySecureStorageCapabilities = KeySecureStorageCapabilities(
+                    keyAlgorithm = "RSA",
                     keyGenerationSuccessful = sampleRSAKey != null && sampleRSAKeyInfo != null,
                     isKeyGenerationInsideSecureHardware = sampleRSAKeyInfo?.isInsideSecureHardware ?: false,
                     keyGenerationSecurityLevel = keyGenerationSecurityLevelFromKeyInfo(sampleRSAKeyInfo),
@@ -97,6 +98,7 @@ class MainViewModel: ViewModel()  {
                     certificateChain = rsaKeyCertificateChain,
                 ),
                 ecKeySecureStorageCapabilities = KeySecureStorageCapabilities(
+                    keyAlgorithm = "EC",
                     keyGenerationSuccessful = sampleECKey != null && sampleECKeyInfo != null,
                     isKeyGenerationInsideSecureHardware = sampleECKeyInfo?.isInsideSecureHardware ?: false,
                     keyGenerationSecurityLevel = keyGenerationSecurityLevelFromKeyInfo(sampleECKeyInfo),
@@ -104,6 +106,7 @@ class MainViewModel: ViewModel()  {
                     certificateChain = ecKeyCertificateChain,
                 ),
                 aesKeySecureStorageCapabilities = KeySecureStorageCapabilities(
+                    keyAlgorithm = "AES",
                     keyGenerationSuccessful = sampleAESKey != null && sampleAESKeyInfo != null,
                     isKeyGenerationInsideSecureHardware = sampleAESKeyInfo?.isInsideSecureHardware ?: false,
                     keyGenerationSecurityLevel = keyGenerationSecurityLevelFromKeyInfo(sampleAESKeyInfo),

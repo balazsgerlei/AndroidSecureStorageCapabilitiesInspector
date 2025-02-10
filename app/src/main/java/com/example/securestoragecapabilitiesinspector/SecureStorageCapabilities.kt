@@ -35,6 +35,7 @@ data class SecureStorageCapabilities (
 )
 
 data class KeySecureStorageCapabilities (
+    val keyAlgorithm: String,
     val keyGenerationSuccessful: Boolean,
     val isKeyGenerationInsideSecureHardware: Boolean,
     val keyGenerationSecurityLevel: KeyGenerationSecurityLevel?,
