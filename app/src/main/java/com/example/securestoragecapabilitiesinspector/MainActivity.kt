@@ -137,11 +137,13 @@ fun SecureStorageCapabilitiesDisplay(
                     .padding(bottom = 16.dp),
             )
 
+            val deviceSupportsStrongbox = state.strongBoxKeystoreProperties != null
             OutlinedCard (
                 modifier = Modifier.padding(bottom = 8.dp)
             ) {
                 KeySecurityDisplay(
                     state = state.rsa256KeySecureStorageCapabilities,
+                    deviceSupportsStrongbox = deviceSupportsStrongbox,
                     biometricEnrollmentStatus = state.biometricEnrollmentStatus,
                     onCertificateClick = { certificate ->
                         certificateToDisplayInDialog.value = certificate
@@ -154,6 +156,7 @@ fun SecureStorageCapabilitiesDisplay(
             ) {
                 KeySecurityDisplay(
                     state = state.rsa512KeySecureStorageCapabilities,
+                    deviceSupportsStrongbox = deviceSupportsStrongbox,
                     biometricEnrollmentStatus = state.biometricEnrollmentStatus,
                     onCertificateClick = { certificate ->
                         certificateToDisplayInDialog.value = certificate
@@ -166,6 +169,7 @@ fun SecureStorageCapabilitiesDisplay(
             ) {
                 KeySecurityDisplay(
                     state = state.ec256KeySecureStorageCapabilities,
+                    deviceSupportsStrongbox = deviceSupportsStrongbox,
                     biometricEnrollmentStatus = state.biometricEnrollmentStatus,
                     onCertificateClick = { certificate ->
                         certificateToDisplayInDialog.value = certificate
@@ -178,6 +182,7 @@ fun SecureStorageCapabilitiesDisplay(
             ) {
                 KeySecurityDisplay(
                     state = state.ec512KeySecureStorageCapabilities,
+                    deviceSupportsStrongbox = deviceSupportsStrongbox,
                     biometricEnrollmentStatus = state.biometricEnrollmentStatus,
                     onCertificateClick = { certificate ->
                         certificateToDisplayInDialog.value = certificate
@@ -190,6 +195,7 @@ fun SecureStorageCapabilitiesDisplay(
             ) {
                 KeySecurityDisplay(
                     state = state.aesKeySecureStorageCapabilities,
+                    deviceSupportsStrongbox = deviceSupportsStrongbox,
                     biometricEnrollmentStatus = state.biometricEnrollmentStatus,
                     onCertificateClick = { certificate ->
                         certificateToDisplayInDialog.value = certificate
@@ -351,6 +357,7 @@ fun HasStrongboxKeystoreDisplay(
 @Composable
 fun KeySecurityDisplay(
     state: KeySecureStorageCapabilities,
+    deviceSupportsStrongbox: Boolean,
     biometricEnrollmentStatus: BiometricEnrollmentStatus,
     onCertificateClick: (Certificate) -> Unit,
     modifier: Modifier = Modifier
@@ -367,6 +374,7 @@ fun KeySecurityDisplay(
             KeyGenerationSecurityLevelDisplay(
                 isKeyGenerationInsideSecureHardware = state.isKeyGenerationInsideSecureHardware,
                 keyGenerationSecurityLevel = state.keyGenerationSecurityLevel,
+                deviceSupportsStrongbox = deviceSupportsStrongbox,
                 modifier = Modifier
                     .padding(horizontal = 8.dp)
                     .padding(bottom = 8.dp),
@@ -399,6 +407,7 @@ fun KeySecurityDisplay(
 fun KeyGenerationSecurityLevelDisplay(
     isKeyGenerationInsideSecureHardware: Boolean,
     keyGenerationSecurityLevel: KeyGenerationSecurityLevel?,
+    deviceSupportsStrongbox: Boolean,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -433,7 +442,12 @@ fun KeyGenerationSecurityLevelDisplay(
             KeyGenerationSecurityLevel.SOFTWARE -> Icons.Default.Dangerous
             KeyGenerationSecurityLevel.UNKNOWN -> Icons.Default.DeviceUnknown
             KeyGenerationSecurityLevel.UNKNOWN_SECURE -> Icons.Default.Warning
-            KeyGenerationSecurityLevel.TRUSTED_ENVIRONMENT, KeyGenerationSecurityLevel.STRONGBOX -> Icons.Default.Lock
+            KeyGenerationSecurityLevel.TRUSTED_ENVIRONMENT -> if (!deviceSupportsStrongbox) {
+                Icons.Default.Lock
+            } else {
+                Icons.Default.Warning
+            }
+            KeyGenerationSecurityLevel.STRONGBOX -> Icons.Default.Lock
         }
         val keySecurityLevelTint = when (keyGenerationSecurityLevel) {
             null -> {
@@ -445,7 +459,7 @@ fun KeyGenerationSecurityLevelDisplay(
                 0xFFF44336
             )
             KeyGenerationSecurityLevel.UNKNOWN_SECURE -> Color(0xFFFFC107)
-            KeyGenerationSecurityLevel.TRUSTED_ENVIRONMENT -> Color(0xFFBFE98D)
+            KeyGenerationSecurityLevel.TRUSTED_ENVIRONMENT -> if(!deviceSupportsStrongbox) Color(0xFFBFE98D) else Color(0xFFFFC107)
             KeyGenerationSecurityLevel.STRONGBOX -> Color(0xFF4CAF50)
         }
         val keySecurityLevelText = if (keyGenerationSecurityLevel != null) {
@@ -672,6 +686,7 @@ fun KeySecurityDisplayPreview() {
                     keyGenerationSecurityLevel = KeyGenerationSecurityLevel.STRONGBOX,
                     isUserAuthenticationRequirementEnforcedBySecureHardware = true,
                 ),
+                deviceSupportsStrongbox = true,
                 biometricEnrollmentStatus = BiometricEnrollmentStatus.ENROLLED,
                 onCertificateClick = { },
             )
