@@ -168,7 +168,9 @@ fun SecureStorageCapabilitiesDisplay(
                 KeySecurityDisplay(
                     state = state.rsa256KeySecureStorageCapabilities,
                     biometricEnrollmentStatus = state.biometricEnrollmentStatus,
-                    certificateToDisplayInDialog = certificateToDisplayInDialog,
+                    onCertificateClick = { certificate ->
+                        certificateToDisplayInDialog.value = certificate
+                    },
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
             }
@@ -178,7 +180,9 @@ fun SecureStorageCapabilitiesDisplay(
                 KeySecurityDisplay(
                     state = state.rsa512KeySecureStorageCapabilities,
                     biometricEnrollmentStatus = state.biometricEnrollmentStatus,
-                    certificateToDisplayInDialog = certificateToDisplayInDialog,
+                    onCertificateClick = { certificate ->
+                        certificateToDisplayInDialog.value = certificate
+                    },
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
             }
@@ -188,7 +192,9 @@ fun SecureStorageCapabilitiesDisplay(
                 KeySecurityDisplay(
                     state = state.ec256KeySecureStorageCapabilities,
                     biometricEnrollmentStatus = state.biometricEnrollmentStatus,
-                    certificateToDisplayInDialog = certificateToDisplayInDialog,
+                    onCertificateClick = { certificate ->
+                        certificateToDisplayInDialog.value = certificate
+                    },
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
             }
@@ -198,7 +204,9 @@ fun SecureStorageCapabilitiesDisplay(
                 KeySecurityDisplay(
                     state = state.ec512KeySecureStorageCapabilities,
                     biometricEnrollmentStatus = state.biometricEnrollmentStatus,
-                    certificateToDisplayInDialog = certificateToDisplayInDialog,
+                    onCertificateClick = { certificate ->
+                        certificateToDisplayInDialog.value = certificate
+                    },
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
             }
@@ -208,10 +216,43 @@ fun SecureStorageCapabilitiesDisplay(
                 KeySecurityDisplay(
                     state = state.aesKeySecureStorageCapabilities,
                     biometricEnrollmentStatus = state.biometricEnrollmentStatus,
-                    certificateToDisplayInDialog = certificateToDisplayInDialog,
+                    onCertificateClick = { certificate ->
+                        certificateToDisplayInDialog.value = certificate
+                    },
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
             }
+        }
+
+        certificateToDisplayInDialog.value?.let {
+            AlertDialog(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                properties = DialogProperties(
+                    usePlatformDefaultWidth = false
+                ),
+                onDismissRequest = {
+                    certificateToDisplayInDialog.value = null
+                },
+                title = { Text(text = "Certificate Details") },
+                text = {
+                    Text(
+                        text = certificateToDisplayInDialog.value.toString(),
+                        modifier = Modifier
+                            .verticalScroll(rememberScrollState())
+                    )
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            certificateToDisplayInDialog.value = null
+                        }
+                    ) {
+                        Text("Close")
+                    }
+                }
+            )
         }
     } else {
         Box(
@@ -336,7 +377,7 @@ fun HasStrongboxKeystoreDisplay(
 fun KeySecurityDisplay(
     state: KeySecureStorageCapabilities,
     biometricEnrollmentStatus: BiometricEnrollmentStatus,
-    certificateToDisplayInDialog: MutableState<Certificate?>,
+    onCertificateClick: (Certificate) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -364,7 +405,7 @@ fun KeySecurityDisplay(
             )
             CertificateChainDisplay(
                 certificateChain = state.certificateChain,
-                certificateToDisplayInDialog = certificateToDisplayInDialog,
+                onCertificateClick = onCertificateClick,
                 modifier = Modifier
                     .padding(horizontal = 8.dp),
             )
@@ -500,7 +541,7 @@ fun UserAuthenticationRequirementEnforcementDisplay(
 @Composable
 fun CertificateChainDisplay(
     certificateChain: List<Certificate>?,
-    certificateToDisplayInDialog: MutableState<Certificate?>,
+    onCertificateClick: (Certificate) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     if (!certificateChain.isNullOrEmpty()) {
@@ -534,44 +575,9 @@ fun CertificateChainDisplay(
             }
             if(showCertificateChain.value) {
                 certificateChain.forEach { certificate ->
-                    CertificateDisplay(
-                        certificate,
-                        onCertificateClick = {
-                            certificateToDisplayInDialog.value = it
-                        }
-                    )
+                    CertificateDisplay(certificate, onCertificateClick)
                 }
             }
-        }
-
-        certificateToDisplayInDialog.value?.let {
-            AlertDialog(
-                modifier = Modifier.fillMaxWidth()
-                    .padding(16.dp),
-                properties = DialogProperties(
-                    usePlatformDefaultWidth = false
-                ),
-                onDismissRequest = {
-                    certificateToDisplayInDialog.value = null
-                },
-                title = { Text(text = "Certificate Details") },
-                text = {
-                    Text(
-                        text = certificateToDisplayInDialog.value.toString(),
-                        modifier = Modifier
-                            .verticalScroll(rememberScrollState())
-                    )
-                },
-                confirmButton = {
-                    Button(
-                        onClick = {
-                            certificateToDisplayInDialog.value = null
-                        }
-                    ) {
-                        Text("Close")
-                    }
-                }
-            )
         }
     } else {
         Text(
@@ -699,8 +705,6 @@ fun DeviceInfoDisplayPreview() {
 @Preview(showBackground = true)
 @Composable
 fun KeySecurityDisplayPreview() {
-    val certificateToDisplayInDialog = remember { mutableStateOf<Certificate?>(null) }
-
     SecureStorageCapabilitiesInspectorTheme {
         Surface(
             color = MaterialTheme.colorScheme.surfaceContainerHighest
@@ -714,7 +718,7 @@ fun KeySecurityDisplayPreview() {
                     isUserAuthenticationRequirementEnforcedBySecureHardware = true,
                 ),
                 biometricEnrollmentStatus = BiometricEnrollmentStatus.ENROLLED,
-                certificateToDisplayInDialog = certificateToDisplayInDialog,
+                onCertificateClick = { },
             )
         }
     }
@@ -723,15 +727,13 @@ fun KeySecurityDisplayPreview() {
 @Preview(showBackground = true)
 @Composable
 fun CertificateChainDisplayPreview() {
-    val certificateToDisplayInDialog = remember { mutableStateOf<Certificate?>(null) }
-
     SecureStorageCapabilitiesInspectorTheme {
         Surface(
             color = MaterialTheme.colorScheme.surfaceContainerHighest
         ) {
             CertificateChainDisplay(
                 certificateChain = null,
-                certificateToDisplayInDialog = certificateToDisplayInDialog,
+                onCertificateClick = { },
             )
         }
     }
