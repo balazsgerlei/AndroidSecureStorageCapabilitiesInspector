@@ -363,7 +363,9 @@ fun KeySecurityDisplay(
     modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = modifier.padding(top = 8.dp)
+        modifier = modifier
+            .padding(top = 8.dp)
+            .fillMaxWidth()
     ) {
         Text(
             text = state.keyAlgorithm,
