@@ -270,14 +270,26 @@ class MainViewModel: ViewModel()  {
             val keyGenerator = initKeyGeneratorWithAESKeyPair(shouldUseStrongBox, requireUserAuthentication)
             return keyGenerator.generateKey()
         } catch (ex: Exception) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && ex is StrongBoxUnavailableException) {
-                Log.d("SecureStorageCapabilitiesInspector", "StrongBox not available on the device, falling back to TEE")
-                val keyGenerator = initKeyGeneratorWithAESKeyPair(shouldUseStrongBox = false, requireUserAuthentication)
-                return keyGenerator.generateKey()
+            if (ex is ProviderException) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && ex is StrongBoxUnavailableException) {
+                    Log.d("SecureStorageCapabilitiesInspector", "StrongBox not available on the device, falling back to TEE")
+                    val keyGenerator = initKeyGeneratorWithAESKeyPair(shouldUseStrongBox = false, requireUserAuthentication)
+                    return keyGenerator.generateKey()
+                } else {
+                    try {
+                        Log.d("SecureStorageCapabilitiesInspector", "ProviderException when StrongBox tried to be used re-init KeyGenerator without it")
+                        val keyGenerator = initKeyGeneratorWithAESKeyPair(shouldUseStrongBox = false, requireUserAuthentication)
+                        return keyGenerator.generateKey()
+                    } catch (e: Exception) {
+                        Log.d("SecureStorageCapabilitiesInspector", "Could not determine if private key is in secure hardware or not")
+                        return null
+                    }
+                }
             } else {
                 Log.d("SecureStorageCapabilitiesInspector", "Could not determine if private key is in secure hardware or not")
                 return null
             }
+
         }
     }
 
@@ -376,15 +388,30 @@ class MainViewModel: ViewModel()  {
                         )
                         return keyPairGenerator.genKeyPair()
                     } else {
-                        Log.d("SecureStorageCapabilitiesInspector", "ProviderException when attestation challenge provided re-init KeyPairGenerator without it")
-                        val keyPairGenerator = initKeyPairGeneratorWithRSAKeyPair(
-                            shouldUseStrongBox,
-                            requireUserAuthentication,
-                            digest = digest
-                        )
-                        return keyPairGenerator.genKeyPair()
+                        try {
+                            Log.d("SecureStorageCapabilitiesInspector", "ProviderException when attestation challenge provided re-init KeyPairGenerator without it")
+                            val keyPairGenerator = initKeyPairGeneratorWithRSAKeyPair(
+                                shouldUseStrongBox,
+                                requireUserAuthentication,
+                                digest = digest
+                            )
+                            return keyPairGenerator.genKeyPair()
+                        } catch (pe: ProviderException) {
+                            try {
+                                Log.d("SecureStorageCapabilitiesInspector", "ProviderException when StrongBox tried to be used re-init KeyGenerator without it")
+                                val keyPairGenerator = initKeyPairGeneratorWithRSAKeyPair(
+                                    shouldUseStrongBox = false,
+                                    requireUserAuthentication,
+                                    attestationChallenge,
+                                    digest = digest
+                                )
+                                return keyPairGenerator.genKeyPair()
+                            } catch (e: Exception) {
+                                Log.d("SecureStorageCapabilitiesInspector", "Could not determine if private key is in secure hardware or not")
+                                return null
+                            }
+                        }
                     }
-
                 }
             } else {
                 Log.d("SecureStorageCapabilitiesInspector", "Could not determine if private key is in secure hardware or not")
@@ -482,13 +509,29 @@ class MainViewModel: ViewModel()  {
                         )
                         return keyPairGenerator.genKeyPair()
                     } else {
-                        Log.d("SecureStorageCapabilitiesInspector", "ProviderException when attestation challenge provided re-init KeyPairGenerator without it")
-                        val keyPairGenerator = initKeyPairGeneratorWithECKeyPair(
-                            shouldUseStrongBox,
-                            requireUserAuthentication,
-                            digest = digest
-                        )
-                        return keyPairGenerator.genKeyPair()
+                        try {
+                            Log.d("SecureStorageCapabilitiesInspector", "ProviderException when attestation challenge provided re-init KeyPairGenerator without it")
+                            val keyPairGenerator = initKeyPairGeneratorWithECKeyPair(
+                                shouldUseStrongBox,
+                                requireUserAuthentication,
+                                digest = digest
+                            )
+                            return keyPairGenerator.genKeyPair()
+                        } catch (pe: ProviderException) {
+                            try {
+                                Log.d("SecureStorageCapabilitiesInspector", "ProviderException when StrongBox tried to be used re-init KeyGenerator without it")
+                                val keyPairGenerator = initKeyPairGeneratorWithECKeyPair(
+                                    shouldUseStrongBox = false,
+                                    requireUserAuthentication,
+                                    attestationChallenge,
+                                    digest = digest
+                                )
+                                return keyPairGenerator.genKeyPair()
+                            } catch (e: Exception) {
+                                Log.d("SecureStorageCapabilitiesInspector", "Could not determine if private key is in secure hardware or not")
+                                return null
+                            }
+                        }
                     }
                 }
             } else {
