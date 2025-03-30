@@ -1,4 +1,4 @@
-package com.example.securestoragecapabilitiesinspector
+package dev.gerlot.securestoragecapabilitiesinspector
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4

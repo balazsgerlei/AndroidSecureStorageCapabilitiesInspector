@@ -1,4 +1,4 @@
-package com.example.securestoragecapabilitiesinspector
+package dev.gerlot.securestoragecapabilitiesinspector
 
 import android.app.KeyguardManager
 import android.content.Context
@@ -163,7 +163,8 @@ class MainViewModel: ViewModel()  {
             val canAuthenticateWithDeviceCredentials =
                 biometricManager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.DEVICE_CREDENTIAL)
             if (canAuthenticateWithDeviceCredentials == BiometricManager.BIOMETRIC_SUCCESS) {
-                biometricEnrollmentStatus = BiometricEnrollmentStatus.ONLY_DEVICE_CREDENTIALS_ENROLLED
+                biometricEnrollmentStatus =
+                    BiometricEnrollmentStatus.ONLY_DEVICE_CREDENTIALS_ENROLLED
             }
         }
         return biometricEnrollmentStatus

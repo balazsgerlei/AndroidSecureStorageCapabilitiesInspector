@@ -1,4 +1,4 @@
-package com.example.securestoragecapabilitiesinspector.ui.theme
+package dev.gerlot.securestoragecapabilitiesinspector.ui.theme
 
 import android.app.Activity
 import android.os.Build
