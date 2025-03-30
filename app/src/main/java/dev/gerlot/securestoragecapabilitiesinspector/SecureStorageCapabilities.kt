@@ -37,7 +37,6 @@ data class SecureStorageCapabilities (
     val isDeviceSecure: Boolean,
     val biometricEnrollmentStatus: BiometricEnrollmentStatus,
     val strongBoxKeystoreProperties: StrongBoxKeystoreProperties?,
-    val keySecureStorageCapabilities: Map<KeyAlgorithm, KeySecureStorageCapabilities>,
 )
 
 data class KeySecureStorageCapabilities (

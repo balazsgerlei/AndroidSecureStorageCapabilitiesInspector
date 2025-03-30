@@ -62,12 +62,14 @@ class MainActivity : AppCompatActivity() {
             SecureStorageCapabilitiesInspectorTheme {
                 val deviceInfoState = viewModel.deviceInfo.observeAsState()
                 val secureStorageCapabilitiesState = viewModel.secureStorageCapabilities.observeAsState()
+                val keySecureStorageCapabilities = viewModel.keySecureStorageCapabilities.observeAsState()
                 val certificateToDisplayInDialog = remember { mutableStateOf<Certificate?>(null) }
 
                 SecureStorageCapabilitiesDisplayScreen(
                     deviceInfoState = deviceInfoState.value,
                     secureStorageCapabilitiesState = secureStorageCapabilitiesState.value,
-                    certificateToDisplayInDialog = certificateToDisplayInDialog
+                    keySecureStorageCapabilitiesState = keySecureStorageCapabilities.value,
+                    certificateToDisplayInDialog = certificateToDisplayInDialog,
                 )
             }
         }
@@ -86,6 +88,7 @@ class MainActivity : AppCompatActivity() {
 fun SecureStorageCapabilitiesDisplayScreen(
     deviceInfoState: DeviceInfo?,
     secureStorageCapabilitiesState: SecureStorageCapabilities?,
+    keySecureStorageCapabilitiesState: Map<KeyAlgorithm, KeySecureStorageCapabilities>?,
     certificateToDisplayInDialog: MutableState<Certificate?>
 ) {
     Scaffold (
@@ -101,7 +104,8 @@ fun SecureStorageCapabilitiesDisplayScreen(
         }
     ) { innerPadding ->
         SecureStorageCapabilitiesDisplay(
-            state = secureStorageCapabilitiesState,
+            secureStorageCapabilitiesState = secureStorageCapabilitiesState,
+            keySecureStorageCapabilitiesState = keySecureStorageCapabilitiesState,
             certificateToDisplayInDialog = certificateToDisplayInDialog,
             modifier = Modifier.padding(innerPadding),
         )
@@ -110,108 +114,128 @@ fun SecureStorageCapabilitiesDisplayScreen(
 
 @Composable
 fun SecureStorageCapabilitiesDisplay(
-    state: SecureStorageCapabilities?,
+    secureStorageCapabilitiesState: SecureStorageCapabilities?,
+    keySecureStorageCapabilitiesState: Map<KeyAlgorithm, KeySecureStorageCapabilities>?,
     certificateToDisplayInDialog: MutableState<Certificate?>,
     modifier: Modifier = Modifier
 ) {
-    if (state != null) {
+    if (secureStorageCapabilitiesState != null) {
         Column(
             modifier = modifier
                 .padding(start = 8.dp, top = 8.dp, end = 8.dp, bottom = 8.dp)
-                .verticalScroll(rememberScrollState())
         ) {
-            DeviceSecureDisplay(
-                isDeviceSecure = state.isDeviceSecure,
-                modifier = Modifier
-                    .padding(horizontal = 8.dp)
-                    .padding(bottom = 8.dp),
-            )
-            BiometricsEnrollmentStatusDisplay(
-                biometricEnrollmentStatus = state.biometricEnrollmentStatus,
-                modifier = Modifier
-                    .padding(horizontal = 8.dp)
-                    .padding(bottom = 8.dp),
-            )
-            HasStrongboxKeystoreDisplay(
-                strongBoxKeystore = state.strongBoxKeystoreProperties,
-                modifier = Modifier
-                    .padding(horizontal = 8.dp)
-                    .padding(bottom = 16.dp),
-            )
+            Column {
+                DeviceSecureDisplay(
+                    isDeviceSecure = secureStorageCapabilitiesState.isDeviceSecure,
+                    modifier = Modifier
+                        .padding(horizontal = 8.dp)
+                        .padding(bottom = 8.dp),
+                )
+                BiometricsEnrollmentStatusDisplay(
+                    biometricEnrollmentStatus = secureStorageCapabilitiesState.biometricEnrollmentStatus,
+                    modifier = Modifier
+                        .padding(horizontal = 8.dp)
+                        .padding(bottom = 8.dp),
+                )
+                HasStrongboxKeystoreDisplay(
+                    strongBoxKeystore = secureStorageCapabilitiesState.strongBoxKeystoreProperties,
+                    modifier = Modifier
+                        .padding(horizontal = 8.dp)
+                        .padding(bottom = 16.dp),
+                )
+            }
 
-            val deviceSupportsStrongbox = state.strongBoxKeystoreProperties != null
-            state.keySecureStorageCapabilities[KeyAlgorithm.RSA_SHA256]?.let {
-                OutlinedCard (
-                    modifier = Modifier.padding(bottom = 8.dp)
+            val deviceSupportsStrongbox = secureStorageCapabilitiesState.strongBoxKeystoreProperties != null
+            val biometricEnrollmentStatus = secureStorageCapabilitiesState.biometricEnrollmentStatus
+            if (keySecureStorageCapabilitiesState != null) {
+                Column (
+                    modifier = Modifier.verticalScroll(rememberScrollState())
                 ) {
-                    KeySecurityDisplay(
-                        state = it,
-                        deviceSupportsStrongbox = deviceSupportsStrongbox,
-                        biometricEnrollmentStatus = state.biometricEnrollmentStatus,
-                        onCertificateClick = { certificate ->
-                            certificateToDisplayInDialog.value = certificate
-                        },
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
+                    keySecureStorageCapabilitiesState[KeyAlgorithm.RSA_SHA256]?.let {
+                        OutlinedCard (
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        ) {
+                            KeySecurityDisplay(
+                                state = it,
+                                deviceSupportsStrongbox = deviceSupportsStrongbox,
+                                biometricEnrollmentStatus = biometricEnrollmentStatus,
+                                onCertificateClick = { certificate ->
+                                    certificateToDisplayInDialog.value = certificate
+                                },
+                                modifier = Modifier.padding(bottom = 8.dp)
+                            )
+                        }
+                    }
+                    keySecureStorageCapabilitiesState[KeyAlgorithm.RSA_SHA512]?.let {
+                        OutlinedCard (
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        ) {
+                            KeySecurityDisplay(
+                                state = it,
+                                deviceSupportsStrongbox = deviceSupportsStrongbox,
+                                biometricEnrollmentStatus = biometricEnrollmentStatus,
+                                onCertificateClick = { certificate ->
+                                    certificateToDisplayInDialog.value = certificate
+                                },
+                                modifier = Modifier.padding(bottom = 8.dp)
+                            )
+                        }
+                    }
+                    keySecureStorageCapabilitiesState[KeyAlgorithm.EC_SHA256]?.let {
+                        OutlinedCard (
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        ) {
+                            KeySecurityDisplay(
+                                state = it,
+                                deviceSupportsStrongbox = deviceSupportsStrongbox,
+                                biometricEnrollmentStatus = biometricEnrollmentStatus,
+                                onCertificateClick = { certificate ->
+                                    certificateToDisplayInDialog.value = certificate
+                                },
+                                modifier = Modifier.padding(bottom = 8.dp)
+                            )
+                        }
+                    }
+                    keySecureStorageCapabilitiesState[KeyAlgorithm.EC_SHA512]?.let {
+                        OutlinedCard (
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        ) {
+                            KeySecurityDisplay(
+                                state = it,
+                                deviceSupportsStrongbox = deviceSupportsStrongbox,
+                                biometricEnrollmentStatus = biometricEnrollmentStatus,
+                                onCertificateClick = { certificate ->
+                                    certificateToDisplayInDialog.value = certificate
+                                },
+                                modifier = Modifier.padding(bottom = 8.dp)
+                            )
+                        }
+                    }
+                    keySecureStorageCapabilitiesState[KeyAlgorithm.AES]?.let {
+                        OutlinedCard (
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        ) {
+                            KeySecurityDisplay(
+                                state = it,
+                                deviceSupportsStrongbox = deviceSupportsStrongbox,
+                                biometricEnrollmentStatus = biometricEnrollmentStatus,
+                                onCertificateClick = { certificate ->
+                                    certificateToDisplayInDialog.value = certificate
+                                },
+                                modifier = Modifier.padding(bottom = 8.dp)
+                            )
+                        }
+                    }
                 }
-            }
-            state.keySecureStorageCapabilities[KeyAlgorithm.RSA_SHA512]?.let {
-                OutlinedCard (
-                    modifier = Modifier.padding(bottom = 8.dp)
+            } else {
+                Box(
+                    modifier = Modifier.weight(1f).fillMaxWidth(),
+                    contentAlignment = Alignment.Center,
                 ) {
-                    KeySecurityDisplay(
-                        state = it,
-                        deviceSupportsStrongbox = deviceSupportsStrongbox,
-                        biometricEnrollmentStatus = state.biometricEnrollmentStatus,
-                        onCertificateClick = { certificate ->
-                            certificateToDisplayInDialog.value = certificate
-                        },
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
-                }
-            }
-            state.keySecureStorageCapabilities[KeyAlgorithm.EC_SHA256]?.let {
-                OutlinedCard (
-                    modifier = Modifier.padding(bottom = 8.dp)
-                ) {
-                    KeySecurityDisplay(
-                        state = it,
-                        deviceSupportsStrongbox = deviceSupportsStrongbox,
-                        biometricEnrollmentStatus = state.biometricEnrollmentStatus,
-                        onCertificateClick = { certificate ->
-                            certificateToDisplayInDialog.value = certificate
-                        },
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
-                }
-            }
-            state.keySecureStorageCapabilities[KeyAlgorithm.EC_SHA512]?.let {
-                OutlinedCard (
-                    modifier = Modifier.padding(bottom = 8.dp)
-                ) {
-                    KeySecurityDisplay(
-                        state = it,
-                        deviceSupportsStrongbox = deviceSupportsStrongbox,
-                        biometricEnrollmentStatus = state.biometricEnrollmentStatus,
-                        onCertificateClick = { certificate ->
-                            certificateToDisplayInDialog.value = certificate
-                        },
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
-                }
-            }
-            state.keySecureStorageCapabilities[KeyAlgorithm.AES]?.let {
-                OutlinedCard (
-                    modifier = Modifier.padding(bottom = 8.dp)
-                ) {
-                    KeySecurityDisplay(
-                        state = it,
-                        deviceSupportsStrongbox = deviceSupportsStrongbox,
-                        biometricEnrollmentStatus = state.biometricEnrollmentStatus,
-                        onCertificateClick = { certificate ->
-                            certificateToDisplayInDialog.value = certificate
-                        },
-                        modifier = Modifier.padding(bottom = 8.dp)
+                    CircularProgressIndicator(
+                        modifier = Modifier.width(64.dp),
+                        color = MaterialTheme.colorScheme.secondary,
+                        trackColor = MaterialTheme.colorScheme.surfaceVariant,
                     )
                 }
             }
@@ -245,17 +269,6 @@ fun SecureStorageCapabilitiesDisplay(
                         Text("Close")
                     }
                 }
-            )
-        }
-    } else {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center,
-        ) {
-            CircularProgressIndicator(
-                modifier = Modifier.width(64.dp),
-                color = MaterialTheme.colorScheme.secondary,
-                trackColor = MaterialTheme.colorScheme.surfaceVariant,
             )
         }
     }
@@ -644,42 +657,42 @@ fun SecureStorageCapabilitiesDisplayScreenPreview() {
                 isDeviceSecure = true,
                 biometricEnrollmentStatus = BiometricEnrollmentStatus.ENROLLED,
                 strongBoxKeystoreProperties = StrongBoxKeystoreProperties.V100,
-                keySecureStorageCapabilities = mapOf (
-                    KeyAlgorithm.RSA_SHA256 to KeySecureStorageCapabilities(
-                        keyAlgorithm = KeyAlgorithm.RSA_SHA256,
-                        keyGenerationSuccessful = true,
-                        isKeyGenerationInsideSecureHardware = true,
-                        keyGenerationSecurityLevel = KeyGenerationSecurityLevel.STRONGBOX,
-                        isUserAuthenticationRequirementEnforcedBySecureHardware = true,
-                    ),
-                    KeyAlgorithm.RSA_SHA512 to KeySecureStorageCapabilities(
-                            keyAlgorithm = KeyAlgorithm.RSA_SHA512,
-                        keyGenerationSuccessful = true,
-                        isKeyGenerationInsideSecureHardware = true,
-                        keyGenerationSecurityLevel = KeyGenerationSecurityLevel.STRONGBOX,
-                        isUserAuthenticationRequirementEnforcedBySecureHardware = true,
-                        ),
-                    KeyAlgorithm.EC_SHA256 to KeySecureStorageCapabilities(
-                        keyAlgorithm = KeyAlgorithm.EC_SHA256,
-                        keyGenerationSuccessful = true,
-                        isKeyGenerationInsideSecureHardware = true,
-                        keyGenerationSecurityLevel = KeyGenerationSecurityLevel.STRONGBOX,
-                        isUserAuthenticationRequirementEnforcedBySecureHardware = true,
-                    ),
-                    KeyAlgorithm.EC_SHA512 to KeySecureStorageCapabilities(
-                        keyAlgorithm = KeyAlgorithm.EC_SHA512,
-                        keyGenerationSuccessful = true,
-                        isKeyGenerationInsideSecureHardware = true,
-                        keyGenerationSecurityLevel = KeyGenerationSecurityLevel.STRONGBOX,
-                        isUserAuthenticationRequirementEnforcedBySecureHardware = true,
-                    ),
-                    KeyAlgorithm.AES to KeySecureStorageCapabilities(
-                        keyAlgorithm = KeyAlgorithm.AES,
-                        keyGenerationSuccessful = true,
-                        isKeyGenerationInsideSecureHardware = true,
-                        keyGenerationSecurityLevel = KeyGenerationSecurityLevel.STRONGBOX,
-                        isUserAuthenticationRequirementEnforcedBySecureHardware = true,
-                    ),
+            ),
+            keySecureStorageCapabilitiesState = mapOf (
+                KeyAlgorithm.RSA_SHA256 to KeySecureStorageCapabilities(
+                    keyAlgorithm = KeyAlgorithm.RSA_SHA256,
+                    keyGenerationSuccessful = true,
+                    isKeyGenerationInsideSecureHardware = true,
+                    keyGenerationSecurityLevel = KeyGenerationSecurityLevel.STRONGBOX,
+                    isUserAuthenticationRequirementEnforcedBySecureHardware = true,
+                ),
+                KeyAlgorithm.RSA_SHA512 to KeySecureStorageCapabilities(
+                    keyAlgorithm = KeyAlgorithm.RSA_SHA512,
+                    keyGenerationSuccessful = true,
+                    isKeyGenerationInsideSecureHardware = true,
+                    keyGenerationSecurityLevel = KeyGenerationSecurityLevel.STRONGBOX,
+                    isUserAuthenticationRequirementEnforcedBySecureHardware = true,
+                ),
+                KeyAlgorithm.EC_SHA256 to KeySecureStorageCapabilities(
+                    keyAlgorithm = KeyAlgorithm.EC_SHA256,
+                    keyGenerationSuccessful = true,
+                    isKeyGenerationInsideSecureHardware = true,
+                    keyGenerationSecurityLevel = KeyGenerationSecurityLevel.STRONGBOX,
+                    isUserAuthenticationRequirementEnforcedBySecureHardware = true,
+                ),
+                KeyAlgorithm.EC_SHA512 to KeySecureStorageCapabilities(
+                    keyAlgorithm = KeyAlgorithm.EC_SHA512,
+                    keyGenerationSuccessful = true,
+                    isKeyGenerationInsideSecureHardware = true,
+                    keyGenerationSecurityLevel = KeyGenerationSecurityLevel.STRONGBOX,
+                    isUserAuthenticationRequirementEnforcedBySecureHardware = true,
+                ),
+                KeyAlgorithm.AES to KeySecureStorageCapabilities(
+                    keyAlgorithm = KeyAlgorithm.AES,
+                    keyGenerationSuccessful = true,
+                    isKeyGenerationInsideSecureHardware = true,
+                    keyGenerationSecurityLevel = KeyGenerationSecurityLevel.STRONGBOX,
+                    isUserAuthenticationRequirementEnforcedBySecureHardware = true,
                 ),
             ),
             certificateToDisplayInDialog = certificateToDisplayInDialog
@@ -732,46 +745,46 @@ fun SecureStorageCapabilitiesDisplayPreview() {
 
     SecureStorageCapabilitiesInspectorTheme {
         SecureStorageCapabilitiesDisplay(
-            state = SecureStorageCapabilities(
+            secureStorageCapabilitiesState = SecureStorageCapabilities(
                 isDeviceSecure = true,
                 biometricEnrollmentStatus = BiometricEnrollmentStatus.ENROLLED,
                 strongBoxKeystoreProperties = StrongBoxKeystoreProperties.V100,
-                keySecureStorageCapabilities = mapOf (
-                    KeyAlgorithm.RSA_SHA256 to KeySecureStorageCapabilities(
-                        keyAlgorithm = KeyAlgorithm.RSA_SHA256,
-                        keyGenerationSuccessful = true,
-                        isKeyGenerationInsideSecureHardware = true,
-                        keyGenerationSecurityLevel = KeyGenerationSecurityLevel.STRONGBOX,
-                        isUserAuthenticationRequirementEnforcedBySecureHardware = true,
-                    ),
-                    KeyAlgorithm.RSA_SHA512 to KeySecureStorageCapabilities(
-                        keyAlgorithm = KeyAlgorithm.RSA_SHA512,
-                        keyGenerationSuccessful = true,
-                        isKeyGenerationInsideSecureHardware = true,
-                        keyGenerationSecurityLevel = KeyGenerationSecurityLevel.STRONGBOX,
-                        isUserAuthenticationRequirementEnforcedBySecureHardware = true,
-                    ),
-                    KeyAlgorithm.EC_SHA256 to KeySecureStorageCapabilities(
-                        keyAlgorithm = KeyAlgorithm.EC_SHA256,
-                        keyGenerationSuccessful = true,
-                        isKeyGenerationInsideSecureHardware = true,
-                        keyGenerationSecurityLevel = KeyGenerationSecurityLevel.STRONGBOX,
-                        isUserAuthenticationRequirementEnforcedBySecureHardware = true,
-                    ),
-                    KeyAlgorithm.EC_SHA512 to KeySecureStorageCapabilities(
-                        keyAlgorithm = KeyAlgorithm.EC_SHA512,
-                        keyGenerationSuccessful = true,
-                        isKeyGenerationInsideSecureHardware = true,
-                        keyGenerationSecurityLevel = KeyGenerationSecurityLevel.STRONGBOX,
-                        isUserAuthenticationRequirementEnforcedBySecureHardware = true,
-                    ),
-                    KeyAlgorithm.AES to KeySecureStorageCapabilities(
-                        keyAlgorithm = KeyAlgorithm.AES,
-                        keyGenerationSuccessful = true,
-                        isKeyGenerationInsideSecureHardware = true,
-                        keyGenerationSecurityLevel = KeyGenerationSecurityLevel.STRONGBOX,
-                        isUserAuthenticationRequirementEnforcedBySecureHardware = true,
-                    ),
+            ),
+            keySecureStorageCapabilitiesState = mapOf (
+                KeyAlgorithm.RSA_SHA256 to KeySecureStorageCapabilities(
+                    keyAlgorithm = KeyAlgorithm.RSA_SHA256,
+                    keyGenerationSuccessful = true,
+                    isKeyGenerationInsideSecureHardware = true,
+                    keyGenerationSecurityLevel = KeyGenerationSecurityLevel.STRONGBOX,
+                    isUserAuthenticationRequirementEnforcedBySecureHardware = true,
+                ),
+                KeyAlgorithm.RSA_SHA512 to KeySecureStorageCapabilities(
+                    keyAlgorithm = KeyAlgorithm.RSA_SHA512,
+                    keyGenerationSuccessful = true,
+                    isKeyGenerationInsideSecureHardware = true,
+                    keyGenerationSecurityLevel = KeyGenerationSecurityLevel.STRONGBOX,
+                    isUserAuthenticationRequirementEnforcedBySecureHardware = true,
+                ),
+                KeyAlgorithm.EC_SHA256 to KeySecureStorageCapabilities(
+                    keyAlgorithm = KeyAlgorithm.EC_SHA256,
+                    keyGenerationSuccessful = true,
+                    isKeyGenerationInsideSecureHardware = true,
+                    keyGenerationSecurityLevel = KeyGenerationSecurityLevel.STRONGBOX,
+                    isUserAuthenticationRequirementEnforcedBySecureHardware = true,
+                ),
+                KeyAlgorithm.EC_SHA512 to KeySecureStorageCapabilities(
+                    keyAlgorithm = KeyAlgorithm.EC_SHA512,
+                    keyGenerationSuccessful = true,
+                    isKeyGenerationInsideSecureHardware = true,
+                    keyGenerationSecurityLevel = KeyGenerationSecurityLevel.STRONGBOX,
+                    isUserAuthenticationRequirementEnforcedBySecureHardware = true,
+                ),
+                KeyAlgorithm.AES to KeySecureStorageCapabilities(
+                    keyAlgorithm = KeyAlgorithm.AES,
+                    keyGenerationSuccessful = true,
+                    isKeyGenerationInsideSecureHardware = true,
+                    keyGenerationSecurityLevel = KeyGenerationSecurityLevel.STRONGBOX,
+                    isUserAuthenticationRequirementEnforcedBySecureHardware = true,
                 ),
             ),
             certificateToDisplayInDialog = certificateToDisplayInDialog,
