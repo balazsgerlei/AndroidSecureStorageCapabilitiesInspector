@@ -10,7 +10,7 @@ android {
     defaultConfig {
         applicationId = "com.example.securestoragecapabilitiesinspector"
         minSdk = 23
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
@@ -50,7 +50,8 @@ dependencies {
     implementation(platform(libs.kotlin.bom))
 
     implementation(libs.androidx.appcompat)
-    implementation(libs.lifecycle.runtime.ktx)
+    implementation(libs.androidx.lifecycle.extensions)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.biometric.ktx)
 
     implementation(libs.androidx.activity.compose)
