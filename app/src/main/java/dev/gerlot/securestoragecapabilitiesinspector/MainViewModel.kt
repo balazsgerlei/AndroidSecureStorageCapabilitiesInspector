@@ -99,49 +99,53 @@ class MainViewModel: ViewModel()  {
             val ec256KeyCertificateChain: List<Certificate>? = certificateChainForKeyInfo(sampleEC256KeyInfo, keyStore)
             val ec512KeyCertificateChain: List<Certificate>? = certificateChainForKeyInfo(sampleEC512KeyInfo, keyStore)
 
-            val secureStorageCapabilitiesResult = SecureStorageCapabilities(
-                isDeviceSecure,
-                biometricEnrollmentStatus,
-                strongBoxKeystoreProperties,
-                rsa256KeySecureStorageCapabilities = KeySecureStorageCapabilities(
-                    keyAlgorithm = "RSA with SHA-256",
+            val keySecureStorageCapabilities: Map<KeyAlgorithm, KeySecureStorageCapabilities> = mapOf (
+                KeyAlgorithm.RSA_SHA256 to KeySecureStorageCapabilities(
+                    keyAlgorithm = KeyAlgorithm.RSA_SHA256,
                     keyGenerationSuccessful = sampleRSA256Key != null && sampleRSA256KeyInfo != null,
                     isKeyGenerationInsideSecureHardware = sampleRSA256KeyInfo?.isInsideSecureHardware ?: false,
                     keyGenerationSecurityLevel = keyGenerationSecurityLevelFromKeyInfo(sampleRSA256KeyInfo),
                     isUserAuthenticationRequirementEnforcedBySecureHardware = sampleRSA256KeyInfo?.isUserAuthenticationRequirementEnforcedBySecureHardware ?: false,
                     certificateChain = rsa256KeyCertificateChain,
                 ),
-                rsa512KeySecureStorageCapabilities = KeySecureStorageCapabilities(
-                    keyAlgorithm = "RSA with SHA-512",
+                KeyAlgorithm.RSA_SHA512 to KeySecureStorageCapabilities(
+                    keyAlgorithm = KeyAlgorithm.RSA_SHA512,
                     keyGenerationSuccessful = sampleRSA512Key != null && sampleRSA512KeyInfo != null,
                     isKeyGenerationInsideSecureHardware = sampleRSA512KeyInfo?.isInsideSecureHardware ?: false,
                     keyGenerationSecurityLevel = keyGenerationSecurityLevelFromKeyInfo(sampleRSA512KeyInfo),
                     isUserAuthenticationRequirementEnforcedBySecureHardware = sampleRSA512KeyInfo?.isUserAuthenticationRequirementEnforcedBySecureHardware ?: false,
                     certificateChain = rsa512KeyCertificateChain,
                 ),
-                ec256KeySecureStorageCapabilities = KeySecureStorageCapabilities(
-                    keyAlgorithm = "EC with SHA-256",
+                KeyAlgorithm.EC_SHA256 to KeySecureStorageCapabilities(
+                    keyAlgorithm = KeyAlgorithm.EC_SHA256,
                     keyGenerationSuccessful = sampleEC256Key != null && sampleEC256KeyInfo != null,
                     isKeyGenerationInsideSecureHardware = sampleEC256KeyInfo?.isInsideSecureHardware ?: false,
                     keyGenerationSecurityLevel = keyGenerationSecurityLevelFromKeyInfo(sampleEC256KeyInfo),
                     isUserAuthenticationRequirementEnforcedBySecureHardware = sampleEC256KeyInfo?.isUserAuthenticationRequirementEnforcedBySecureHardware ?: false,
                     certificateChain = ec256KeyCertificateChain,
                 ),
-                ec512KeySecureStorageCapabilities = KeySecureStorageCapabilities(
-                    keyAlgorithm = "EC with SHA-512",
+                KeyAlgorithm.EC_SHA512 to KeySecureStorageCapabilities(
+                    keyAlgorithm = KeyAlgorithm.EC_SHA512,
                     keyGenerationSuccessful = sampleEC512Key != null && sampleEC512KeyInfo != null,
                     isKeyGenerationInsideSecureHardware = sampleEC512KeyInfo?.isInsideSecureHardware ?: false,
                     keyGenerationSecurityLevel = keyGenerationSecurityLevelFromKeyInfo(sampleEC512KeyInfo),
                     isUserAuthenticationRequirementEnforcedBySecureHardware = sampleEC512KeyInfo?.isUserAuthenticationRequirementEnforcedBySecureHardware ?: false,
                     certificateChain = ec512KeyCertificateChain,
                 ),
-                aesKeySecureStorageCapabilities = KeySecureStorageCapabilities(
-                    keyAlgorithm = "AES",
+                KeyAlgorithm.AES to KeySecureStorageCapabilities(
+                    keyAlgorithm = KeyAlgorithm.AES,
                     keyGenerationSuccessful = sampleAESKey != null && sampleAESKeyInfo != null,
                     isKeyGenerationInsideSecureHardware = sampleAESKeyInfo?.isInsideSecureHardware ?: false,
                     keyGenerationSecurityLevel = keyGenerationSecurityLevelFromKeyInfo(sampleAESKeyInfo),
                     isUserAuthenticationRequirementEnforcedBySecureHardware = sampleAESKeyInfo?.isUserAuthenticationRequirementEnforcedBySecureHardware ?: false,
                 ),
+            )
+
+            val secureStorageCapabilitiesResult = SecureStorageCapabilities(
+                isDeviceSecure,
+                biometricEnrollmentStatus,
+                strongBoxKeystoreProperties,
+                keySecureStorageCapabilities = keySecureStorageCapabilities,
             )
             CoroutineScope(Dispatchers.Main).launch {
                 _secureStorageCapabilities.value = secureStorageCapabilitiesResult
