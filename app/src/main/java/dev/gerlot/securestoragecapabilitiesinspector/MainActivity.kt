@@ -1,4 +1,4 @@
-package com.example.securestoragecapabilitiesinspector
+package dev.gerlot.securestoragecapabilitiesinspector
 
 import android.os.Build
 import android.os.Bundle
@@ -49,7 +49,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
-import com.example.securestoragecapabilitiesinspector.ui.theme.SecureStorageCapabilitiesInspectorTheme
+import dev.gerlot.securestoragecapabilitiesinspector.ui.theme.SecureStorageCapabilitiesInspectorTheme
 
 class MainActivity : AppCompatActivity() {
 
