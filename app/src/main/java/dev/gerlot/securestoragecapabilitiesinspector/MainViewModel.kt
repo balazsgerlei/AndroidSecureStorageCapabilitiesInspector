@@ -37,11 +37,14 @@ private const val SAMPLE_EC_KEY_ALIAS = "sample_ec_key"
 
 class MainViewModel: ViewModel()  {
 
+    private val _deviceInfo = MutableLiveData<DeviceInfo>()
+    val deviceInfo: LiveData<DeviceInfo> = _deviceInfo
+
     private val _secureStorageCapabilities = MutableLiveData<SecureStorageCapabilities>()
     val secureStorageCapabilities: LiveData<SecureStorageCapabilities> = _secureStorageCapabilities
 
-    private val _deviceInfo = MutableLiveData<DeviceInfo>()
-    val deviceInfo: LiveData<DeviceInfo> = _deviceInfo
+    private val _keySecureStorageCapabilities = MutableLiveData<Map<KeyAlgorithm, KeySecureStorageCapabilities>>()
+    val keySecureStorageCapabilities: LiveData<Map<KeyAlgorithm, KeySecureStorageCapabilities>> = _keySecureStorageCapabilities
 
     fun retrieveDeviceInfo() {
         _deviceInfo.value = DeviceInfo(
@@ -54,20 +57,34 @@ class MainViewModel: ViewModel()  {
     }
 
     fun inspectSecureStorageCapabilities(context: Context) {
+        val keyGuardManager: KeyguardManager = context.getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
+
+        val isDeviceSecure = keyGuardManager.isDeviceSecure
+
+        val strongBoxKeystoreProperties = getStrongBoxKeystoreProperties(context.packageManager)
+        val canUseStrongBoxForKeyGeneration = strongBoxKeystoreProperties != null
+
+        val biometricEnrollmentStatus = getBiometricEnrollmentStatus(BiometricManager.from(context))
+        val canRequireUserAuthentication = biometricEnrollmentStatus == BiometricEnrollmentStatus.ENROLLED
+                || biometricEnrollmentStatus == BiometricEnrollmentStatus.ONLY_DEVICE_CREDENTIALS_ENROLLED
+
+        _secureStorageCapabilities.value = SecureStorageCapabilities(
+            isDeviceSecure,
+            biometricEnrollmentStatus,
+            strongBoxKeystoreProperties,
+        )
+        inspectKeySecureStorageCapabilities(context, canUseStrongBoxForKeyGeneration, canRequireUserAuthentication)
+    }
+
+    fun inspectKeySecureStorageCapabilities(
+        context: Context,
+        canUseStrongBoxForKeyGeneration: Boolean,
+        canRequireUserAuthentication: Boolean
+    ) {
         CoroutineScope(Dispatchers.Default).launch {
-            val keyGuardManager: KeyguardManager = context.getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
             val keyStore = KeyStore.getInstance(ANDROID_KEYSTORE).apply {
                 load(null) // The KeyStore needs to be initialized via a call to load, to be able to use it
             }
-
-            val isDeviceSecure = keyGuardManager.isDeviceSecure
-
-            val strongBoxKeystoreProperties = getStrongBoxKeystoreProperties(context.packageManager)
-            val canUseStrongBoxForKeyGeneration = strongBoxKeystoreProperties != null
-
-            val biometricEnrollmentStatus = getBiometricEnrollmentStatus(BiometricManager.from(context))
-            val canRequireUserAuthentication = biometricEnrollmentStatus == BiometricEnrollmentStatus.ENROLLED
-                || biometricEnrollmentStatus == BiometricEnrollmentStatus.ONLY_DEVICE_CREDENTIALS_ENROLLED
 
             val sampleAESKey = generateSampleAESKey(
                 shouldUseStrongBox = canUseStrongBoxForKeyGeneration,
@@ -141,14 +158,8 @@ class MainViewModel: ViewModel()  {
                 ),
             )
 
-            val secureStorageCapabilitiesResult = SecureStorageCapabilities(
-                isDeviceSecure,
-                biometricEnrollmentStatus,
-                strongBoxKeystoreProperties,
-                keySecureStorageCapabilities = keySecureStorageCapabilities,
-            )
             CoroutineScope(Dispatchers.Main).launch {
-                _secureStorageCapabilities.value = secureStorageCapabilitiesResult
+                _keySecureStorageCapabilities.value = keySecureStorageCapabilities
             }
         }
     }
