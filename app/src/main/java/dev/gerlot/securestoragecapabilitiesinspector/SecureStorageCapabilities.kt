@@ -25,19 +25,23 @@ enum class KeyGenerationSecurityLevel {
     STRONGBOX,
 }
 
+enum class KeyAlgorithm(val displayName: String) {
+    RSA_SHA256("RSA with SHA-256"),
+    RSA_SHA512("RSA with SHA-512"),
+    EC_SHA256("EC with SHA-256"),
+    EC_SHA512("EC with SHA-512"),
+    AES("AES"),
+}
+
 data class SecureStorageCapabilities (
     val isDeviceSecure: Boolean,
     val biometricEnrollmentStatus: BiometricEnrollmentStatus,
     val strongBoxKeystoreProperties: StrongBoxKeystoreProperties?,
-    val rsa256KeySecureStorageCapabilities: KeySecureStorageCapabilities,
-    val rsa512KeySecureStorageCapabilities: KeySecureStorageCapabilities,
-    val ec256KeySecureStorageCapabilities: KeySecureStorageCapabilities,
-    val ec512KeySecureStorageCapabilities: KeySecureStorageCapabilities,
-    val aesKeySecureStorageCapabilities: KeySecureStorageCapabilities,
+    val keySecureStorageCapabilities: Map<KeyAlgorithm, KeySecureStorageCapabilities>,
 )
 
 data class KeySecureStorageCapabilities (
-    val keyAlgorithm: String,
+    val keyAlgorithm: KeyAlgorithm,
     val keyGenerationSuccessful: Boolean,
     val isKeyGenerationInsideSecureHardware: Boolean,
     val keyGenerationSecurityLevel: KeyGenerationSecurityLevel?,
