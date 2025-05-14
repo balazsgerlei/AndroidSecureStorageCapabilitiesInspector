@@ -365,12 +365,12 @@ fun HasStrongboxKeystoreDisplay(
     val icon = when(strongBoxKeystore) {
         null -> Icons.Default.Warning
         StrongBoxKeystoreProperties.VERSION_UNKNOWN -> Icons.Default.DeviceUnknown
-        StrongBoxKeystoreProperties.V300, StrongBoxKeystoreProperties.V200, StrongBoxKeystoreProperties.V100, StrongBoxKeystoreProperties.V41, StrongBoxKeystoreProperties.V40 -> Icons.Default.CheckCircle
+        StrongBoxKeystoreProperties.V400, StrongBoxKeystoreProperties.V300, StrongBoxKeystoreProperties.V200, StrongBoxKeystoreProperties.V100, StrongBoxKeystoreProperties.V41, StrongBoxKeystoreProperties.V40 -> Icons.Default.CheckCircle
     }
     val iconTint = when(strongBoxKeystore) {
         null -> Color(0xFFFFC107)
         StrongBoxKeystoreProperties.VERSION_UNKNOWN -> Color(0xFFBFE98D)
-        StrongBoxKeystoreProperties.V300, StrongBoxKeystoreProperties.V200, StrongBoxKeystoreProperties.V100, StrongBoxKeystoreProperties.V41, StrongBoxKeystoreProperties.V40 -> Color(0xFF4CAF50)
+        StrongBoxKeystoreProperties.V400, StrongBoxKeystoreProperties.V300, StrongBoxKeystoreProperties.V200, StrongBoxKeystoreProperties.V100, StrongBoxKeystoreProperties.V41, StrongBoxKeystoreProperties.V40 -> Color(0xFF4CAF50)
     }
     Row(
         verticalAlignment = Alignment.CenterVertically,
