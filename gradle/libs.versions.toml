@@ -1,5 +1,5 @@
 [versions]
-agp-version = "8.9.2"
+agp-version = "8.10.0"
 kotlin-version = "1.9.25"
 core-ktx-version = "1.16.0"
 appcompat-version = "1.7.0"
