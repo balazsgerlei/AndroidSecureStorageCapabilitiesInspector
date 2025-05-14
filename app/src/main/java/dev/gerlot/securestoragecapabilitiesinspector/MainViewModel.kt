@@ -190,6 +190,11 @@ class MainViewModel: ViewModel()  {
             when {
                 packageManager.hasSystemFeature(
                     PackageManager.FEATURE_STRONGBOX_KEYSTORE,
+                    400
+                ) -> StrongBoxKeystoreProperties.V400
+
+                packageManager.hasSystemFeature(
+                    PackageManager.FEATURE_STRONGBOX_KEYSTORE,
                     300
                 ) -> StrongBoxKeystoreProperties.V300
 

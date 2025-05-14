@@ -14,7 +14,7 @@ enum class BiometricEnrollmentStatus {
 }
 
 enum class StrongBoxKeystoreProperties {
-    V300, V200, V100, V41, V40, VERSION_UNKNOWN
+    V400, V300, V200, V100, V41, V40, VERSION_UNKNOWN
 }
 
 enum class KeyGenerationSecurityLevel {
