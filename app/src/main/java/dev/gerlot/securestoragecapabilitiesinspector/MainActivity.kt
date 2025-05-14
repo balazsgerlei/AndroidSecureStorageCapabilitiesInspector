@@ -295,8 +295,8 @@ fun DeviceSecureDisplay(
         Color(0xFF4CAF50)
     } else Color(0xFFF44336)
     val text =
-        if (isDeviceSecure) "Protected with PIN, pattern or password"
-        else "Unprotected (NO secure lock screen set)"
+        if (isDeviceSecure) "Secure lock (PIN, pattern or password) set"
+        else "NO secure lock (PIN, pattern or password) set"
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier,
@@ -360,8 +360,8 @@ fun HasStrongboxKeystoreDisplay(
     modifier: Modifier = Modifier
 ) {
     val text = if (strongBoxKeystore != null) {
-        "StrongBox Keystore supported: $strongBoxKeystore"
-    } else "NO StrongBox Keystore"
+        "StrongBox available ($strongBoxKeystore)"
+    } else "NO StrongBox"
     val icon = when(strongBoxKeystore) {
         null -> Icons.Default.Warning
         StrongBoxKeystoreProperties.VERSION_UNKNOWN -> Icons.Default.DeviceUnknown
@@ -456,8 +456,8 @@ fun KeyGenerationSecurityLevelDisplay(
             Color(0xFF4CAF50)
         } else Color(0xFFF44336)
         val secureHardwareText =
-            if (isKeyGenerationInsideSecureHardware) "Key generated inside secure hardware"
-            else "Key NOT generated inside secure hardware"
+            if (isKeyGenerationInsideSecureHardware) "Generated inside secure hardware"
+            else "NOT generated inside secure hardware"
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(bottom = 8.dp),
@@ -499,9 +499,9 @@ fun KeyGenerationSecurityLevelDisplay(
             KeyGenerationSecurityLevel.STRONGBOX -> Color(0xFF4CAF50)
         }
         val keySecurityLevelText = if (keyGenerationSecurityLevel != null) {
-            "Key generation security level: $keyGenerationSecurityLevel"
+            "Security level: $keyGenerationSecurityLevel"
         } else {
-            StringBuilder("Key generation security level cannot be determined").also {
+            StringBuilder("Security level cannot be determined").also {
                 if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
                     it.append(" (No API to check)")
                 }
@@ -538,10 +538,10 @@ fun UserAuthenticationRequirementEnforcementDisplay(
     } else Color(0xFFF44336)
     val text =
         if (isUserAuthenticationRequirementEnforcedBySecureHardware) {
-            "Key user authentication requirement enforced by secure hardware"
+            "User authentication requirement enforced by secure hardware"
         }
         else {
-            StringBuilder("Key user authentication requirement NOT enforced by secure hardware").also {
+            StringBuilder("User authentication requirement NOT enforced by secure hardware").also {
                 if (biometricEnrollmentStatus != BiometricEnrollmentStatus.ENROLLED) {
                     it.append(" (NO Biometric credentials enrolled)")
                 }
