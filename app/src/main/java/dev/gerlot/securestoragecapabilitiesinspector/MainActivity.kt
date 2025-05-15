@@ -9,7 +9,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -335,7 +334,7 @@ fun BiometricsEnrollmentStatusDisplay(
         BiometricEnrollmentStatus.HW_UNAVAILABLE -> "Biometrics hardware UNAVAILABLE"
         BiometricEnrollmentStatus.NONE_ENROLLED -> "NO Biometrics credential enrolled"
         BiometricEnrollmentStatus.NO_HARDWARE -> "NO Biometrics hardware found"
-        BiometricEnrollmentStatus.SECURITIY_UPDATE_REQUIRED -> "Security update required to re-enable Biometrics"
+        BiometricEnrollmentStatus.SECURITY_UPDATE_REQUIRED -> "Security update required to re-enable Biometrics"
     }
     Row(
         verticalAlignment = Alignment.CenterVertically,

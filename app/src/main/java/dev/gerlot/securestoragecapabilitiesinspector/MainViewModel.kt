@@ -170,7 +170,7 @@ class MainViewModel: ViewModel()  {
             BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE -> BiometricEnrollmentStatus.NO_HARDWARE
             BiometricManager.BIOMETRIC_SUCCESS -> BiometricEnrollmentStatus.ENROLLED
             BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED -> BiometricEnrollmentStatus.NONE_ENROLLED
-            BiometricManager.BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED -> BiometricEnrollmentStatus.SECURITIY_UPDATE_REQUIRED
+            BiometricManager.BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED -> BiometricEnrollmentStatus.SECURITY_UPDATE_REQUIRED
             BiometricManager.BIOMETRIC_ERROR_UNSUPPORTED -> BiometricEnrollmentStatus.UNSUPPORTED
             else -> BiometricEnrollmentStatus.UNKNOWN
         }
