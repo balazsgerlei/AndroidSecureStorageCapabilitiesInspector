@@ -10,7 +10,7 @@ enum class BiometricEnrollmentStatus {
     HW_UNAVAILABLE,
     NONE_ENROLLED,
     NO_HARDWARE,
-    SECURITIY_UPDATE_REQUIRED,
+    SECURITY_UPDATE_REQUIRED,
 }
 
 enum class StrongBoxKeystoreProperties {
