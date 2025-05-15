@@ -73,11 +73,10 @@ class MainViewModel: ViewModel()  {
             biometricEnrollmentStatus,
             strongBoxKeystoreProperties,
         )
-        inspectKeySecureStorageCapabilities(context, canUseStrongBoxForKeyGeneration, canRequireUserAuthentication)
+        inspectKeySecureStorageCapabilities(canUseStrongBoxForKeyGeneration, canRequireUserAuthentication)
     }
 
-    fun inspectKeySecureStorageCapabilities(
-        context: Context,
+    private fun inspectKeySecureStorageCapabilities(
         canUseStrongBoxForKeyGeneration: Boolean,
         canRequireUserAuthentication: Boolean
     ) {
