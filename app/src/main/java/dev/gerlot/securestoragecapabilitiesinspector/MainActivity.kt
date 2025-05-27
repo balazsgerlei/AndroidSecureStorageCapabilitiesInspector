@@ -39,7 +39,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -60,15 +61,15 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             SecureStorageCapabilitiesInspectorTheme {
-                val deviceInfoState = viewModel.deviceInfo.observeAsState()
-                val secureStorageCapabilitiesState = viewModel.secureStorageCapabilities.observeAsState()
-                val keySecureStorageCapabilities = viewModel.keySecureStorageCapabilities.observeAsState()
+                val deviceInfoState by viewModel.deviceInfo.collectAsState()
+                val secureStorageCapabilitiesState by viewModel.secureStorageCapabilities.collectAsState()
+                val keySecureStorageCapabilities by viewModel.keySecureStorageCapabilities.collectAsState()
                 val certificateToDisplayInDialog = remember { mutableStateOf<Certificate?>(null) }
 
                 SecureStorageCapabilitiesDisplayScreen(
-                    deviceInfoState = deviceInfoState.value,
-                    secureStorageCapabilitiesState = secureStorageCapabilitiesState.value,
-                    keySecureStorageCapabilitiesState = keySecureStorageCapabilities.value,
+                    deviceInfoState = deviceInfoState,
+                    secureStorageCapabilitiesState = secureStorageCapabilitiesState,
+                    keySecureStorageCapabilitiesState = keySecureStorageCapabilities,
                     certificateToDisplayInDialog = certificateToDisplayInDialog,
                 )
             }
@@ -77,7 +78,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        viewModel.retrieveDeviceInfo()
         viewModel.inspectSecureStorageCapabilities(this)
     }
 
@@ -86,7 +86,7 @@ class MainActivity : AppCompatActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SecureStorageCapabilitiesDisplayScreen(
-    deviceInfoState: DeviceInfo?,
+    deviceInfoState: DeviceInfo,
     secureStorageCapabilitiesState: SecureStorageCapabilities?,
     keySecureStorageCapabilitiesState: Map<KeyAlgorithm, KeySecureStorageCapabilities>?,
     certificateToDisplayInDialog: MutableState<Certificate?>
@@ -97,10 +97,10 @@ fun SecureStorageCapabilitiesDisplayScreen(
                 title = {
                     Column {
                         Text(
-                            text = if (deviceInfoState?.deviceName?.lowercase()?.contains(deviceInfoState.deviceBrand.lowercase()) != true) {
-                                "${deviceInfoState?.deviceBrand} ${deviceInfoState?.deviceName} (${deviceInfoState?.deviceModel})"
+                            text = if (!deviceInfoState.deviceName.lowercase().contains(deviceInfoState.deviceBrand.lowercase())) {
+                                "${deviceInfoState.deviceBrand} ${deviceInfoState.deviceName} (${deviceInfoState.deviceModel})"
                             } else {
-                                "${deviceInfoState?.deviceName} (${deviceInfoState?.deviceModel})"
+                                "${deviceInfoState.deviceName} (${deviceInfoState.deviceModel})"
                             },
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
