@@ -10,11 +10,11 @@ import android.security.keystore.KeyProperties
 import android.security.keystore.StrongBoxUnavailableException
 import android.util.Log
 import androidx.biometric.BiometricManager
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.security.Key
 import java.security.KeyFactory
@@ -37,24 +37,22 @@ private const val SAMPLE_EC_KEY_ALIAS = "sample_ec_key"
 
 class MainViewModel: ViewModel()  {
 
-    private val _deviceInfo = MutableLiveData<DeviceInfo>()
-    val deviceInfo: LiveData<DeviceInfo> = _deviceInfo
-
-    private val _secureStorageCapabilities = MutableLiveData<SecureStorageCapabilities>()
-    val secureStorageCapabilities: LiveData<SecureStorageCapabilities> = _secureStorageCapabilities
-
-    private val _keySecureStorageCapabilities = MutableLiveData<Map<KeyAlgorithm, KeySecureStorageCapabilities>>()
-    val keySecureStorageCapabilities: LiveData<Map<KeyAlgorithm, KeySecureStorageCapabilities>> = _keySecureStorageCapabilities
-
-    fun retrieveDeviceInfo() {
-        _deviceInfo.value = DeviceInfo(
-            deviceName = Build.MODEL,
-            deviceBrand = Build.MANUFACTURER,
-            deviceModel = Build.DEVICE,
-            androidVersion = Build.VERSION.RELEASE,
+    private val _deviceInfo = MutableStateFlow(
+        DeviceInfo(
+            deviceName = Build.MODEL ?: "Unknown",
+            deviceBrand = Build.MANUFACTURER ?: "Unknown",
+            deviceModel = Build.DEVICE ?: "Unknown",
+            androidVersion = Build.VERSION.RELEASE ?: "Unknown",
             androidApiLevel = Build.VERSION.SDK_INT,
-        )
-    }
+            )
+    )
+    val deviceInfo = _deviceInfo.asStateFlow()
+
+    private val _secureStorageCapabilities = MutableStateFlow<SecureStorageCapabilities?>(null)
+    val secureStorageCapabilities = _secureStorageCapabilities.asStateFlow()
+
+    private val _keySecureStorageCapabilities = MutableStateFlow<Map<KeyAlgorithm, KeySecureStorageCapabilities>?>(null)
+    val keySecureStorageCapabilities = _keySecureStorageCapabilities.asStateFlow()
 
     fun inspectSecureStorageCapabilities(context: Context) {
         val keyGuardManager: KeyguardManager = context.getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
