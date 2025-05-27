@@ -97,7 +97,11 @@ fun SecureStorageCapabilitiesDisplayScreen(
                 title = {
                     Column {
                         Text(
-                            text = "${deviceInfoState?.deviceBrand} ${deviceInfoState?.deviceName} (${deviceInfoState?.deviceModel})",
+                            text = if (deviceInfoState?.deviceName?.lowercase()?.contains(deviceInfoState.deviceBrand.lowercase()) != true) {
+                                "${deviceInfoState?.deviceBrand} ${deviceInfoState?.deviceName} (${deviceInfoState?.deviceModel})"
+                            } else {
+                                "${deviceInfoState?.deviceName} (${deviceInfoState?.deviceModel})"
+                            },
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                         )
