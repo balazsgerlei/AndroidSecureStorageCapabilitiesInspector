@@ -237,7 +237,8 @@ class MainViewModel: ViewModel()  {
                 subject = x509Certificate.subjectX500Principal.name,
                 notBefore = x509Certificate.notBefore,
                 notAfter = x509Certificate.notAfter,
-                stringRepresentation = certificate.toString()
+                stringRepresentation = certificate.toString(),
+                encoded = certificate.encoded,
             )
         }
     }
