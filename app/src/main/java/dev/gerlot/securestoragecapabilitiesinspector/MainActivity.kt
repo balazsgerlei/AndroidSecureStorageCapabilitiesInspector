@@ -7,6 +7,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -28,6 +29,8 @@ import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardColors
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -52,6 +55,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
+import dev.gerlot.securestoragecapabilitiesinspector.ui.theme.Green200
 import dev.gerlot.securestoragecapabilitiesinspector.ui.theme.SecureStorageCapabilitiesInspectorTheme
 import java.util.Date
 
@@ -667,6 +671,9 @@ fun CertificateDisplay(
         onClick = {
             onCertificateClick(certificate)
         },
+        colors = if (GOOGLE_ROOT_CERTIFICATES.contains(encodeBERCertificateToString(certificate.encoded))) {
+            CardDefaults.cardColors().copy(containerColor = Green200)
+        } else CardDefaults.cardColors(),
         modifier = modifier.padding(bottom = 8.dp),
     ) {
         Row (
