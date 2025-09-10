@@ -54,14 +54,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import dev.gerlot.securestoragecapabilitiesinspector.ui.theme.SecureStorageCapabilitiesInspectorTheme
 import java.util.Date
-import kotlin.io.encoding.Base64
-import kotlin.io.encoding.ExperimentalEncodingApi
 
 class MainActivity : AppCompatActivity() {
 
     private val viewModel: MainViewModel by viewModels()
 
-    @OptIn(ExperimentalEncodingApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
@@ -81,7 +78,7 @@ class MainActivity : AppCompatActivity() {
                         val certificatesExport = certificates.joinToString (
                             separator = ",\n"
                         ) {
-                            "-----BEGIN CERTIFICATE-----\n${Base64.Default.encode(it.encoded).chunked(64).joinToString("\n")}\n-----END CERTIFICATE-----"
+                            encodeBERCertificateToString(it.encoded)
                         }
                         val sendIntent: Intent = Intent().apply {
                             action = Intent.ACTION_SEND
