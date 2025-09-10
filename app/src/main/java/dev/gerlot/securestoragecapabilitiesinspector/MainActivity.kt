@@ -1,5 +1,6 @@
 package dev.gerlot.securestoragecapabilitiesinspector
 
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.compose.setContent
@@ -31,6 +32,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.Scaffold
@@ -51,11 +53,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import dev.gerlot.securestoragecapabilitiesinspector.ui.theme.SecureStorageCapabilitiesInspectorTheme
+import java.util.Date
+import kotlin.io.encoding.Base64
+import kotlin.io.encoding.ExperimentalEncodingApi
 
 class MainActivity : AppCompatActivity() {
 
     private val viewModel: MainViewModel by viewModels()
 
+    @OptIn(ExperimentalEncodingApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
@@ -71,6 +77,21 @@ class MainActivity : AppCompatActivity() {
                     secureStorageCapabilitiesState = secureStorageCapabilitiesState,
                     keySecureStorageCapabilitiesState = keySecureStorageCapabilities,
                     certificateToDisplayInDialog = certificateToDisplayInDialog,
+                    onExportCertificateChainClick = { certificates ->
+                        val certificatesExport = certificates.joinToString (
+                            separator = ",\n"
+                        ) {
+                            "-----BEGIN CERTIFICATE-----\n${Base64.Default.encode(it.encoded).chunked(64).joinToString("\n")}\n-----END CERTIFICATE-----"
+                        }
+                        val sendIntent: Intent = Intent().apply {
+                            action = Intent.ACTION_SEND
+                            putExtra(Intent.EXTRA_TEXT, certificatesExport)
+                            type = "text/plain"
+                        }
+
+                        val shareIntent = Intent.createChooser(sendIntent, null)
+                        startActivity(shareIntent)
+                    }
                 )
             }
         }
@@ -89,7 +110,8 @@ fun SecureStorageCapabilitiesDisplayScreen(
     deviceInfoState: DeviceInfo,
     secureStorageCapabilitiesState: SecureStorageCapabilities?,
     keySecureStorageCapabilitiesState: Map<KeyAlgorithm, KeySecureStorageCapabilities>?,
-    certificateToDisplayInDialog: MutableState<Certificate?>
+    certificateToDisplayInDialog: MutableState<Certificate?>,
+    onExportCertificateChainClick: (List<Certificate>) -> Unit,
 ) {
     Scaffold (
         topBar = {
@@ -119,6 +141,7 @@ fun SecureStorageCapabilitiesDisplayScreen(
             secureStorageCapabilitiesState = secureStorageCapabilitiesState,
             keySecureStorageCapabilitiesState = keySecureStorageCapabilitiesState,
             certificateToDisplayInDialog = certificateToDisplayInDialog,
+            onExportCertificateChainClick = onExportCertificateChainClick,
             modifier = Modifier.padding(innerPadding),
         )
     }
@@ -129,6 +152,7 @@ fun SecureStorageCapabilitiesDisplay(
     secureStorageCapabilitiesState: SecureStorageCapabilities?,
     keySecureStorageCapabilitiesState: Map<KeyAlgorithm, KeySecureStorageCapabilities>?,
     certificateToDisplayInDialog: MutableState<Certificate?>,
+    onExportCertificateChainClick: (List<Certificate>) -> Unit,
     modifier: Modifier = Modifier
 ) {
     if (secureStorageCapabilitiesState != null) {
@@ -174,6 +198,7 @@ fun SecureStorageCapabilitiesDisplay(
                                 onCertificateClick = { certificate ->
                                     certificateToDisplayInDialog.value = certificate
                                 },
+                                onExportCertificateChainClick = onExportCertificateChainClick,
                                 modifier = Modifier.padding(bottom = 8.dp)
                             )
                         }
@@ -189,6 +214,7 @@ fun SecureStorageCapabilitiesDisplay(
                                 onCertificateClick = { certificate ->
                                     certificateToDisplayInDialog.value = certificate
                                 },
+                                onExportCertificateChainClick = onExportCertificateChainClick,
                                 modifier = Modifier.padding(bottom = 8.dp)
                             )
                         }
@@ -204,6 +230,7 @@ fun SecureStorageCapabilitiesDisplay(
                                 onCertificateClick = { certificate ->
                                     certificateToDisplayInDialog.value = certificate
                                 },
+                                onExportCertificateChainClick = onExportCertificateChainClick,
                                 modifier = Modifier.padding(bottom = 8.dp)
                             )
                         }
@@ -219,6 +246,7 @@ fun SecureStorageCapabilitiesDisplay(
                                 onCertificateClick = { certificate ->
                                     certificateToDisplayInDialog.value = certificate
                                 },
+                                onExportCertificateChainClick = onExportCertificateChainClick,
                                 modifier = Modifier.padding(bottom = 8.dp)
                             )
                         }
@@ -234,6 +262,7 @@ fun SecureStorageCapabilitiesDisplay(
                                 onCertificateClick = { certificate ->
                                     certificateToDisplayInDialog.value = certificate
                                 },
+                                onExportCertificateChainClick = onExportCertificateChainClick,
                                 modifier = Modifier.padding(bottom = 8.dp)
                             )
                         }
@@ -241,7 +270,9 @@ fun SecureStorageCapabilitiesDisplay(
                 }
             } else {
                 Box(
-                    modifier = Modifier.weight(1f).fillMaxWidth(),
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth(),
                     contentAlignment = Alignment.Center,
                 ) {
                     CircularProgressIndicator(
@@ -397,6 +428,7 @@ fun KeySecurityDisplay(
     deviceSupportsStrongbox: Boolean,
     biometricEnrollmentStatus: BiometricEnrollmentStatus,
     onCertificateClick: (Certificate) -> Unit,
+    onExportCertificateChainClick: (List<Certificate>) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -410,6 +442,8 @@ fun KeySecurityDisplay(
             modifier = Modifier.padding(start = 8.dp, top = 8.dp, end = 0.dp, bottom = 8.dp)
         )
         if (state.keyGenerationSuccessful) {
+            val showCertificateChain = remember { mutableStateOf(false) }
+
             KeyGenerationSecurityLevelDisplay(
                 isKeyGenerationInsideSecureHardware = state.isKeyGenerationInsideSecureHardware,
                 keyGenerationSecurityLevel = state.keyGenerationSecurityLevel,
@@ -426,8 +460,11 @@ fun KeySecurityDisplay(
                     .padding(bottom = 8.dp),
             )
             CertificateChainDisplay(
+                showCertificateChain = showCertificateChain.value,
+                onShowCertificateChainClick = { showCertificateChain.value = !showCertificateChain.value },
                 certificateChain = state.certificateChain,
                 onCertificateClick = onCertificateClick,
+                onExportCertificateChainClick = onExportCertificateChainClick,
                 modifier = Modifier
                     .padding(horizontal = 8.dp),
             )
@@ -568,13 +605,14 @@ fun UserAuthenticationRequirementEnforcementDisplay(
 
 @Composable
 fun CertificateChainDisplay(
+    showCertificateChain: Boolean,
+    onShowCertificateChainClick: () -> Unit,
     certificateChain: List<Certificate>?,
     onCertificateClick: (Certificate) -> Unit,
+    onExportCertificateChainClick: (List<Certificate>) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     if (!certificateChain.isNullOrEmpty()) {
-        val showCertificateChain = remember { mutableStateOf(false) }
-
         Column (
             modifier = modifier,
         ) {
@@ -589,21 +627,27 @@ fun CertificateChainDisplay(
                         .weight(1f)
                 )
                 OutlinedIconButton (
-                    onClick = {
-                        showCertificateChain.value = !showCertificateChain.value
-                    },
+                    onClick = onShowCertificateChainClick,
                     modifier = Modifier
                         .size(44.dp)
                 ) {
                     Icon(
-                        imageVector = if (showCertificateChain.value) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                        imageVector = if (showCertificateChain) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
                         contentDescription = null
                     )
                 }
             }
-            if(showCertificateChain.value) {
+            if(showCertificateChain) {
                 certificateChain.forEach { certificate ->
                     CertificateDisplay(certificate, onCertificateClick)
+                }
+                OutlinedButton(
+                    onClick = { onExportCertificateChainClick(certificateChain) },
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .padding(bottom = 8.dp)
+                ) {
+                    Text("Export Certificate Chain")
                 }
             }
         }
@@ -707,7 +751,8 @@ fun SecureStorageCapabilitiesDisplayScreenPreview() {
                     isUserAuthenticationRequirementEnforcedBySecureHardware = true,
                 ),
             ),
-            certificateToDisplayInDialog = certificateToDisplayInDialog
+            certificateToDisplayInDialog = certificateToDisplayInDialog,
+            onExportCertificateChainClick = { },
         )
     }
 }
@@ -730,6 +775,25 @@ fun KeySecurityDisplayPreview() {
                 deviceSupportsStrongbox = true,
                 biometricEnrollmentStatus = BiometricEnrollmentStatus.ENROLLED,
                 onCertificateClick = { },
+                onExportCertificateChainClick = { },
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun NoCertificateChainDisplayPreview() {
+    SecureStorageCapabilitiesInspectorTheme {
+        Surface(
+            color = MaterialTheme.colorScheme.surfaceContainerHighest
+        ) {
+            CertificateChainDisplay(
+                showCertificateChain = false,
+                onShowCertificateChainClick = { },
+                certificateChain = null,
+                onCertificateClick = { },
+                onExportCertificateChainClick = { },
             )
         }
     }
@@ -738,13 +802,66 @@ fun KeySecurityDisplayPreview() {
 @Preview(showBackground = true)
 @Composable
 fun CertificateChainDisplayPreview() {
+    val certificateChain = listOf(
+        Certificate(
+            subject = "",
+            notBefore = Date(),
+            notAfter = Date(),
+            stringRepresentation = "",
+            encoded = byteArrayOf(),
+        ),
+        Certificate(
+            subject = "",
+            notBefore = Date(),
+            notAfter = Date(),
+            stringRepresentation = "",
+            encoded = byteArrayOf(),
+        )
+    )
     SecureStorageCapabilitiesInspectorTheme {
         Surface(
             color = MaterialTheme.colorScheme.surfaceContainerHighest
         ) {
             CertificateChainDisplay(
-                certificateChain = null,
+                showCertificateChain = false,
+                onShowCertificateChainClick = { },
+                certificateChain = certificateChain,
                 onCertificateClick = { },
+                onExportCertificateChainClick = { },
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ExpandedCertificateChainDisplayPreview() {
+    val certificateChain = listOf(
+        Certificate(
+            subject = "CN=Android Keystore Key",
+            notBefore = Date(),
+            notAfter = Date(),
+            stringRepresentation = "",
+            encoded = byteArrayOf(),
+        ),
+        Certificate(
+            subject = "CN=Android Keystore Key",
+            notBefore = Date(),
+            notAfter = Date(),
+            stringRepresentation = "",
+            encoded = byteArrayOf(),
+        )
+    )
+    SecureStorageCapabilitiesInspectorTheme {
+        Surface(
+            color = MaterialTheme.colorScheme.surfaceContainerHighest
+        ) {
+            CertificateChainDisplay(
+                showCertificateChain = true,
+                onShowCertificateChainClick = { },
+                certificateChain = certificateChain,
+                onCertificateClick = { },
+                onExportCertificateChainClick = { },
             )
         }
     }
@@ -800,6 +917,7 @@ fun SecureStorageCapabilitiesDisplayPreview() {
                 ),
             ),
             certificateToDisplayInDialog = certificateToDisplayInDialog,
+            onExportCertificateChainClick = { },
         )
     }
 }

@@ -53,8 +53,33 @@ data class Certificate (
     val notBefore: Date,
     val notAfter: Date,
     val stringRepresentation: String,
+    val encoded: ByteArray,
 ) {
     override fun toString(): String {
         return stringRepresentation
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Certificate
+
+        if (subject != other.subject) return false
+        if (notBefore != other.notBefore) return false
+        if (notAfter != other.notAfter) return false
+        if (stringRepresentation != other.stringRepresentation) return false
+        if (!encoded.contentEquals(other.encoded)) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = subject.hashCode()
+        result = 31 * result + notBefore.hashCode()
+        result = 31 * result + notAfter.hashCode()
+        result = 31 * result + stringRepresentation.hashCode()
+        result = 31 * result + encoded.contentHashCode()
+        return result
     }
 }
