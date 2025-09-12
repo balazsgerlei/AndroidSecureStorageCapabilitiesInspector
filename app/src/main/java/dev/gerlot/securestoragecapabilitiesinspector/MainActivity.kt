@@ -7,7 +7,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -29,7 +28,6 @@ import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -80,7 +78,7 @@ class MainActivity : AppCompatActivity() {
                     keySecureStorageCapabilitiesState = keySecureStorageCapabilities,
                     certificateToDisplayInDialog = certificateToDisplayInDialog,
                     onExportCertificateChainClick = { certificates ->
-                        val certificatesExport = certificates.joinToString (
+                        val certificatesExport = certificates.joinToString(
                             separator = ",\n"
                         ) {
                             encodeBERCertificateToString(it.encoded)
@@ -115,7 +113,7 @@ fun SecureStorageCapabilitiesDisplayScreen(
     certificateToDisplayInDialog: MutableState<Certificate?>,
     onExportCertificateChainClick: (List<Certificate>) -> Unit,
 ) {
-    Scaffold (
+    Scaffold(
         topBar = {
             TopAppBar(
                 title = {
@@ -186,11 +184,11 @@ fun SecureStorageCapabilitiesDisplay(
             val deviceSupportsStrongbox = secureStorageCapabilitiesState.strongBoxKeystoreProperties != null
             val biometricEnrollmentStatus = secureStorageCapabilitiesState.biometricEnrollmentStatus
             if (keySecureStorageCapabilitiesState != null) {
-                Column (
+                Column(
                     modifier = Modifier.verticalScroll(rememberScrollState())
                 ) {
                     keySecureStorageCapabilitiesState[KeyAlgorithm.RSA_SHA256]?.let {
-                        OutlinedCard (
+                        OutlinedCard(
                             modifier = Modifier.padding(bottom = 8.dp)
                         ) {
                             KeySecurityDisplay(
@@ -206,7 +204,7 @@ fun SecureStorageCapabilitiesDisplay(
                         }
                     }
                     keySecureStorageCapabilitiesState[KeyAlgorithm.RSA_SHA512]?.let {
-                        OutlinedCard (
+                        OutlinedCard(
                             modifier = Modifier.padding(bottom = 8.dp)
                         ) {
                             KeySecurityDisplay(
@@ -222,7 +220,7 @@ fun SecureStorageCapabilitiesDisplay(
                         }
                     }
                     keySecureStorageCapabilitiesState[KeyAlgorithm.EC_SHA256]?.let {
-                        OutlinedCard (
+                        OutlinedCard(
                             modifier = Modifier.padding(bottom = 8.dp)
                         ) {
                             KeySecurityDisplay(
@@ -238,7 +236,7 @@ fun SecureStorageCapabilitiesDisplay(
                         }
                     }
                     keySecureStorageCapabilitiesState[KeyAlgorithm.EC_SHA512]?.let {
-                        OutlinedCard (
+                        OutlinedCard(
                             modifier = Modifier.padding(bottom = 8.dp)
                         ) {
                             KeySecurityDisplay(
@@ -254,7 +252,7 @@ fun SecureStorageCapabilitiesDisplay(
                         }
                     }
                     keySecureStorageCapabilitiesState[KeyAlgorithm.AES]?.let {
-                        OutlinedCard (
+                        OutlinedCard(
                             modifier = Modifier.padding(bottom = 8.dp)
                         ) {
                             KeySecurityDisplay(
@@ -361,16 +359,16 @@ fun BiometricsEnrollmentStatusDisplay(
     biometricEnrollmentStatus: BiometricEnrollmentStatus,
     modifier: Modifier = Modifier
 ) {
-    val icon = when(biometricEnrollmentStatus) {
+    val icon = when (biometricEnrollmentStatus) {
         BiometricEnrollmentStatus.ENROLLED, BiometricEnrollmentStatus.ONLY_DEVICE_CREDENTIALS_ENROLLED -> Icons.Default.Lock
         else -> Icons.Default.Warning
     }
-    val iconTint = when(biometricEnrollmentStatus) {
+    val iconTint = when (biometricEnrollmentStatus) {
         BiometricEnrollmentStatus.ENROLLED -> Color(0xFF4CAF50)
         BiometricEnrollmentStatus.ONLY_DEVICE_CREDENTIALS_ENROLLED -> Color(0xFFBFE98D)
         else -> Color(0xFFF44336)
     }
-    val text = when(biometricEnrollmentStatus) {
+    val text = when (biometricEnrollmentStatus) {
         BiometricEnrollmentStatus.ENROLLED -> "Biometrics enrolled"
         BiometricEnrollmentStatus.ONLY_DEVICE_CREDENTIALS_ENROLLED -> "Secure device credentials set (NO STRONG biometrics enrolled)"
         BiometricEnrollmentStatus.UNKNOWN -> "Biometrics enrollment status UNKNOWN"
@@ -405,12 +403,12 @@ fun HasStrongboxKeystoreDisplay(
     val text = if (strongBoxKeystore != null) {
         "StrongBox available ($strongBoxKeystore)"
     } else "NO StrongBox"
-    val icon = when(strongBoxKeystore) {
+    val icon = when (strongBoxKeystore) {
         null -> Icons.Default.Warning
         StrongBoxKeystoreProperties.VERSION_UNKNOWN -> Icons.Default.DeviceUnknown
         StrongBoxKeystoreProperties.V400, StrongBoxKeystoreProperties.V300, StrongBoxKeystoreProperties.V200, StrongBoxKeystoreProperties.V100, StrongBoxKeystoreProperties.V41, StrongBoxKeystoreProperties.V40 -> Icons.Default.CheckCircle
     }
-    val iconTint = when(strongBoxKeystore) {
+    val iconTint = when (strongBoxKeystore) {
         null -> Color(0xFFFFC107)
         StrongBoxKeystoreProperties.VERSION_UNKNOWN -> Color(0xFFBFE98D)
         StrongBoxKeystoreProperties.V400, StrongBoxKeystoreProperties.V300, StrongBoxKeystoreProperties.V200, StrongBoxKeystoreProperties.V100, StrongBoxKeystoreProperties.V41, StrongBoxKeystoreProperties.V40 -> Color(0xFF4CAF50)
@@ -462,7 +460,7 @@ fun KeySecurityDisplay(
                     .padding(bottom = 8.dp),
             )
             UserAuthenticationRequirementEnforcementDisplay(
-                biometricEnrollmentStatus = biometricEnrollmentStatus ,
+                biometricEnrollmentStatus = biometricEnrollmentStatus,
                 isUserAuthenticationRequirementEnforcedBySecureHardware = state.isUserAuthenticationRequirementEnforcedBySecureHardware,
                 modifier = Modifier
                     .padding(horizontal = 8.dp)
@@ -470,7 +468,9 @@ fun KeySecurityDisplay(
             )
             CertificateChainDisplay(
                 showCertificateChain = showCertificateChain.value,
-                onShowCertificateChainClick = { showCertificateChain.value = !showCertificateChain.value },
+                onShowCertificateChainClick = {
+                    showCertificateChain.value = !showCertificateChain.value
+                },
                 certificateChain = state.certificateChain,
                 onCertificateClick = onCertificateClick,
                 onExportCertificateChainClick = onExportCertificateChainClick,
@@ -532,6 +532,7 @@ fun KeyGenerationSecurityLevelDisplay(
             } else {
                 Icons.Default.Warning
             }
+
             KeyGenerationSecurityLevel.STRONGBOX -> Icons.Default.Lock
         }
         val keySecurityLevelTint = when (keyGenerationSecurityLevel) {
@@ -540,11 +541,14 @@ fun KeyGenerationSecurityLevelDisplay(
                     Color(0xFFFFC107)
                 } else Color(0xFFF44336)
             }
-            KeyGenerationSecurityLevel.UNKNOWN, KeyGenerationSecurityLevel.SOFTWARE -> Color(
-                0xFFF44336
-            )
+
+            KeyGenerationSecurityLevel.UNKNOWN, KeyGenerationSecurityLevel.SOFTWARE -> Color(0xFFF44336)
+
             KeyGenerationSecurityLevel.UNKNOWN_SECURE -> Color(0xFFFFC107)
-            KeyGenerationSecurityLevel.TRUSTED_ENVIRONMENT -> if(!deviceSupportsStrongbox) Color(0xFFBFE98D) else Color(0xFFFFC107)
+            KeyGenerationSecurityLevel.TRUSTED_ENVIRONMENT -> if (!deviceSupportsStrongbox) {
+                Color(0xFFBFE98D)
+            } else Color(0xFFFFC107)
+
             KeyGenerationSecurityLevel.STRONGBOX -> Color(0xFF4CAF50)
         }
         val keySecurityLevelText = if (keyGenerationSecurityLevel != null) {
@@ -588,8 +592,7 @@ fun UserAuthenticationRequirementEnforcementDisplay(
     val text =
         if (isUserAuthenticationRequirementEnforcedBySecureHardware) {
             "User authentication requirement enforced by secure hardware"
-        }
-        else {
+        } else {
             StringBuilder("User authentication requirement NOT enforced by secure hardware").also {
                 if (biometricEnrollmentStatus != BiometricEnrollmentStatus.ENROLLED) {
                     it.append(" (NO Biometric credentials enrolled)")
@@ -622,10 +625,10 @@ fun CertificateChainDisplay(
     modifier: Modifier = Modifier,
 ) {
     if (!certificateChain.isNullOrEmpty()) {
-        Column (
+        Column(
             modifier = modifier,
         ) {
-            Row (
+            Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.padding(bottom = 8.dp, end = 8.dp)
             ) {
@@ -635,7 +638,7 @@ fun CertificateChainDisplay(
                         .padding(horizontal = 8.dp)
                         .weight(1f)
                 )
-                OutlinedIconButton (
+                OutlinedIconButton(
                     onClick = onShowCertificateChainClick,
                     modifier = Modifier
                         .size(44.dp)
@@ -675,7 +678,7 @@ fun CertificateDisplay(
     onCertificateClick: (Certificate) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Card (
+    Card(
         onClick = {
             onCertificateClick(certificate)
         },
@@ -684,11 +687,11 @@ fun CertificateDisplay(
         } else CardDefaults.cardColors(),
         modifier = modifier.padding(bottom = 8.dp),
     ) {
-        Row (
+        Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(start = 8.dp, top = 8.dp, end = 16.dp, bottom = 8.dp)
         ) {
-            Column (
+            Column(
                 modifier = Modifier
                     .padding(8.dp)
                     .weight(1f)
@@ -726,7 +729,7 @@ fun SecureStorageCapabilitiesDisplayScreenPreview() {
                 biometricEnrollmentStatus = BiometricEnrollmentStatus.ENROLLED,
                 strongBoxKeystoreProperties = StrongBoxKeystoreProperties.V100,
             ),
-            keySecureStorageCapabilitiesState = mapOf (
+            keySecureStorageCapabilitiesState = mapOf(
                 KeyAlgorithm.RSA_SHA256 to KeySecureStorageCapabilities(
                     keyAlgorithm = KeyAlgorithm.RSA_SHA256,
                     keyGenerationSuccessful = true,
@@ -891,7 +894,7 @@ fun SecureStorageCapabilitiesDisplayPreview() {
                 biometricEnrollmentStatus = BiometricEnrollmentStatus.ENROLLED,
                 strongBoxKeystoreProperties = StrongBoxKeystoreProperties.V100,
             ),
-            keySecureStorageCapabilitiesState = mapOf (
+            keySecureStorageCapabilitiesState = mapOf(
                 KeyAlgorithm.RSA_SHA256 to KeySecureStorageCapabilities(
                     keyAlgorithm = KeyAlgorithm.RSA_SHA256,
                     keyGenerationSuccessful = true,
