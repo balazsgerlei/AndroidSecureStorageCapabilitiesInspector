@@ -51,6 +51,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -285,7 +286,7 @@ fun SecureStorageCapabilitiesDisplay(
             }
         }
 
-        certificateToDisplayInDialog.value?.let {
+        certificateToDisplayInDialog.value?.let { certificate ->
             AlertDialog(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -298,11 +299,18 @@ fun SecureStorageCapabilitiesDisplay(
                 },
                 title = { Text(text = "Certificate Details") },
                 text = {
-                    Text(
-                        text = certificateToDisplayInDialog.value.toString(),
+                    Column(
                         modifier = Modifier
                             .verticalScroll(rememberScrollState())
-                    )
+                    ) {
+                        Text(
+                            text = certificate.toString(),
+                            fontWeight = FontWeight.Bold,
+                        )
+                        Text(
+                            text = encodeBERCertificateToString(certificate.encoded)
+                        )
+                    }
                 },
                 confirmButton = {
                     Button(
@@ -638,7 +646,7 @@ fun CertificateChainDisplay(
                     )
                 }
             }
-            if(showCertificateChain) {
+            if (showCertificateChain) {
                 certificateChain.forEach { certificate ->
                     CertificateDisplay(certificate, onCertificateClick)
                 }
