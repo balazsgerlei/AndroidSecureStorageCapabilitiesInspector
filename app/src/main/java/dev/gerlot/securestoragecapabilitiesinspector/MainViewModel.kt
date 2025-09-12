@@ -35,7 +35,7 @@ private const val SAMPLE_AES_KEY_ALIAS = "sample_aes_key"
 private const val SAMPLE_RSA_KEY_ALIAS = "sample_rsa_key"
 private const val SAMPLE_EC_KEY_ALIAS = "sample_ec_key"
 
-class MainViewModel: ViewModel()  {
+class MainViewModel : ViewModel() {
 
     private val _deviceInfo = MutableStateFlow(
         DeviceInfo(
@@ -44,7 +44,7 @@ class MainViewModel: ViewModel()  {
             deviceModel = Build.DEVICE ?: "Unknown",
             androidVersion = Build.VERSION.RELEASE ?: "Unknown",
             androidApiLevel = Build.VERSION.SDK_INT,
-            )
+        )
     )
     val deviceInfo = _deviceInfo.asStateFlow()
 
@@ -85,23 +85,28 @@ class MainViewModel: ViewModel()  {
 
             val sampleAESKey = generateSampleAESKey(
                 shouldUseStrongBox = canUseStrongBoxForKeyGeneration,
-                requireUserAuthentication = canRequireUserAuthentication)
+                requireUserAuthentication = canRequireUserAuthentication
+            )
             val sampleRSA256Key = generateSampleRSAKeyPair(
                 shouldUseStrongBox = canUseStrongBoxForKeyGeneration,
                 requireUserAuthentication = canRequireUserAuthentication,
-                digest = KeyProperties.DIGEST_SHA256)?.private
+                digest = KeyProperties.DIGEST_SHA256
+            )?.private
             val sampleRSA512Key = generateSampleRSAKeyPair(
                 shouldUseStrongBox = canUseStrongBoxForKeyGeneration,
                 requireUserAuthentication = canRequireUserAuthentication,
-                digest = KeyProperties.DIGEST_SHA512)?.private
+                digest = KeyProperties.DIGEST_SHA512
+            )?.private
             val sampleEC256Key = generateSampleECKeyPair(
                 shouldUseStrongBox = canUseStrongBoxForKeyGeneration,
                 requireUserAuthentication = canRequireUserAuthentication,
-                digest = KeyProperties.DIGEST_SHA256)?.private
+                digest = KeyProperties.DIGEST_SHA256
+            )?.private
             val sampleEC512Key = generateSampleECKeyPair(
                 shouldUseStrongBox = canUseStrongBoxForKeyGeneration,
                 requireUserAuthentication = canRequireUserAuthentication,
-                digest = KeyProperties.DIGEST_SHA512)?.private
+                digest = KeyProperties.DIGEST_SHA512
+            )?.private
 
             val sampleAESKeyInfo = getKeyInfoForAESKey(sampleAESKey)
             val sampleRSA256KeyInfo = getKeyInfoForRSAKey(sampleRSA256Key)
@@ -214,6 +219,7 @@ class MainViewModel: ViewModel()  {
                     PackageManager.FEATURE_STRONGBOX_KEYSTORE,
                     40
                 ) -> StrongBoxKeystoreProperties.V40
+
                 else -> StrongBoxKeystoreProperties.VERSION_UNKNOWN
             }
         } else null
@@ -230,7 +236,10 @@ class MainViewModel: ViewModel()  {
         getKeyInfoForAsymmetricPrivateKey(it as PrivateKey)
     }
 
-    private fun certificateChainForKeyInfo(keyInfo: KeyInfo?, keyStore: KeyStore): List<Certificate>? = keyInfo?.let {
+    private fun certificateChainForKeyInfo(
+        keyInfo: KeyInfo?,
+        keyStore: KeyStore
+    ): List<Certificate>? = keyInfo?.let {
         keyStore.getCertificateChain(keyInfo.keystoreAlias).map { certificate ->
             val x509Certificate = certificate as X509Certificate
             Certificate(
@@ -243,15 +252,16 @@ class MainViewModel: ViewModel()  {
         }
     }
 
-    private fun keyGenerationSecurityLevelFromKeyInfo(keyInfo: KeyInfo?) = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        when(keyInfo?.securityLevel) {
-            KeyProperties.SECURITY_LEVEL_UNKNOWN_SECURE -> KeyGenerationSecurityLevel.UNKNOWN_SECURE
-            KeyProperties.SECURITY_LEVEL_SOFTWARE -> KeyGenerationSecurityLevel.SOFTWARE
-            KeyProperties.SECURITY_LEVEL_TRUSTED_ENVIRONMENT -> KeyGenerationSecurityLevel.TRUSTED_ENVIRONMENT
-            KeyProperties.SECURITY_LEVEL_STRONGBOX -> KeyGenerationSecurityLevel.STRONGBOX
-            else -> KeyGenerationSecurityLevel.UNKNOWN
-        }
-    } else null
+    private fun keyGenerationSecurityLevelFromKeyInfo(keyInfo: KeyInfo?) =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            when (keyInfo?.securityLevel) {
+                KeyProperties.SECURITY_LEVEL_UNKNOWN_SECURE -> KeyGenerationSecurityLevel.UNKNOWN_SECURE
+                KeyProperties.SECURITY_LEVEL_SOFTWARE -> KeyGenerationSecurityLevel.SOFTWARE
+                KeyProperties.SECURITY_LEVEL_TRUSTED_ENVIRONMENT -> KeyGenerationSecurityLevel.TRUSTED_ENVIRONMENT
+                KeyProperties.SECURITY_LEVEL_STRONGBOX -> KeyGenerationSecurityLevel.STRONGBOX
+                else -> KeyGenerationSecurityLevel.UNKNOWN
+            }
+        } else null
 
     private fun createAESKeyGenSpec(
         shouldUseStrongBox: Boolean,
@@ -446,7 +456,7 @@ class MainViewModel: ViewModel()  {
         requireUserAuthentication: Boolean,
         attestationChallenge: ByteArray?,
         digest: String,
-    ) : KeyGenParameterSpec = KeyGenParameterSpec.Builder(
+    ): KeyGenParameterSpec = KeyGenParameterSpec.Builder(
         SAMPLE_EC_KEY_ALIAS,
         KeyProperties.PURPOSE_SIGN or KeyProperties.PURPOSE_VERIFY
     ).run {
