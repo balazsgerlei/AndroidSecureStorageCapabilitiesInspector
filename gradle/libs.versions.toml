@@ -1,13 +1,13 @@
 [versions]
 agp-version = "8.13.0"
-kotlin-version = "1.9.25"
+kotlin-version = "2.2.0"
 core-ktx-version = "1.16.0"
 appcompat-version = "1.7.1"
 androidx-lifecycle-extensions-version = "2.2.0"
 androidx-lifecycle-runtime-ktx-version = "2.9.3"
 biometric-ktx-version = "1.2.0-alpha05"
 activity-compose-version = "1.10.1"
-compose-bom-version = "2025.08.01"
+compose-bom-version = "2025.09.01"
 kotlinCompilerExtensionVersion = "1.5.15"
 material-version = "1.13.0"
 constraintlayout-version = "2.2.1"
@@ -43,3 +43,4 @@ androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-co
 android-application = { id = "com.android.application", version.ref = "agp-version" }
 android-library = { id = "com.android.library", version.ref = "agp-version" }
 jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin-version" }
+jetbrains-compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin-version" }
