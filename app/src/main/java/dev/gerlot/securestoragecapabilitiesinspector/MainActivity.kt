@@ -683,7 +683,10 @@ fun CertificateDisplay(
             onCertificateClick(certificate)
         },
         colors = if (GOOGLE_ROOT_CERTIFICATES.contains(encodeBERCertificateToString(certificate.encoded))) {
-            CardDefaults.cardColors().copy(containerColor = Green200)
+            CardDefaults.cardColors().copy(
+                containerColor = Green200,
+                contentColor = Color.Black,
+            )
         } else CardDefaults.cardColors(),
         modifier = modifier.padding(bottom = 8.dp),
     ) {
