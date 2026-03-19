@@ -125,11 +125,13 @@ fun SecureStorageCapabilitiesDisplayScreen(
                                 "${deviceInfoState.deviceName} (${deviceInfoState.deviceModel})"
                             },
                             maxLines = 1,
+                            style = MaterialTheme.typography.titleLarge,
                             overflow = TextOverflow.Ellipsis,
                         )
                         Text(
-                            text = "Android ${deviceInfoState?.androidVersion} (API ${deviceInfoState?.androidApiLevel})",
+                            text = "Android ${deviceInfoState.androidVersion} (API ${deviceInfoState.androidApiLevel})",
                             maxLines = 1,
+                            style = MaterialTheme.typography.titleMedium,
                             overflow = TextOverflow.Ellipsis,
                         )
                     }
