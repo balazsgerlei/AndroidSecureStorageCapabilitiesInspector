@@ -6,4 +6,5 @@ data class DeviceInfo(
     val deviceModel: String,
     val androidVersion: String,
     val androidApiLevel: Int,
+    val androidVariantName: String? = null,
 )

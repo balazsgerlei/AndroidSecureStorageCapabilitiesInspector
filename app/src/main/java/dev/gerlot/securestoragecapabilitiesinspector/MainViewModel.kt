@@ -44,6 +44,7 @@ class MainViewModel : ViewModel() {
             deviceModel = Build.DEVICE ?: "Unknown",
             androidVersion = Build.VERSION.RELEASE ?: "Unknown",
             androidApiLevel = Build.VERSION.SDK_INT,
+            androidVariantName = AndroidVariantUtils.variantName
         )
     )
     val deviceInfo = _deviceInfo.asStateFlow()
