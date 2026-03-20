@@ -56,6 +56,14 @@ class AndroidVariantUtils {
                     }
                 }
 
+                // ColorOS (older versions)
+                // Before merging the codebase of OxygenOS and ColorOS, another property should be checked
+                if (getSystemProperty("ro.build.version.opporom").isNotEmpty()
+                    || Build.MANUFACTURER.contains("oppo", ignoreCase = true)
+                ) {
+                    return "ColorOS"
+                }
+
                 // Nothing OS
                 if (getSystemProperty("ro.nothing.os.version").isNotEmpty()
                     || Build.MANUFACTURER.contains("nothing", ignoreCase = true)
@@ -86,7 +94,6 @@ class AndroidVariantUtils {
                 if (Build.DISPLAY.contains("lineage", ignoreCase = true)) {
                     return "LineageOS"
                 }
-
 
                 // iodéOS
                 // Usually based on Lineage but branded
