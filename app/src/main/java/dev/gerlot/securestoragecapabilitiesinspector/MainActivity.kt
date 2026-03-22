@@ -99,6 +99,10 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        // If the Android variant could not be determined, we try to check for GrapheneOS packages
+        if (viewModel.deviceInfo.value.androidVariantName == null) {
+            viewModel.checkForGrapheneOs(this)
+        }
         viewModel.inspectSecureStorageCapabilities(this)
     }
 

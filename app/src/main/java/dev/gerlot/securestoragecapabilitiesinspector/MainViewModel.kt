@@ -55,6 +55,14 @@ class MainViewModel : ViewModel() {
     private val _keySecureStorageCapabilities = MutableStateFlow<Map<KeyAlgorithm, KeySecureStorageCapabilities>?>(null)
     val keySecureStorageCapabilities = _keySecureStorageCapabilities.asStateFlow()
 
+    fun checkForGrapheneOs(context: Context) {
+        if (GrapheneOsHelper.isGrapheneOs(context)) {
+            _deviceInfo.value = _deviceInfo.value.copy(
+                androidVariantName = "GrapheneOS"
+            )
+        }
+    }
+
     fun inspectSecureStorageCapabilities(context: Context) {
         val keyGuardManager: KeyguardManager = context.getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
 
