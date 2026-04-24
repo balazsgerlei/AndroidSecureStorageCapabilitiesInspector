@@ -1,4 +1,4 @@
-package dev.gerlot.securestoragecapabilitiesinspector
+package dev.gerlot.securestoragecapabilities
 
 import android.content.Context
 import android.content.pm.ApplicationInfo

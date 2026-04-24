@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "dev.gerlot.securestoragecapabilitiesinspector"
+    namespace = "dev.gerlot.securestoragecapabilities"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "dev.gerlot.securestoragecapabilitiesinspector"
+        applicationId = "dev.gerlot.securestoragecapabilities"
         minSdk = 23
         targetSdk = 35
         versionCode = 1

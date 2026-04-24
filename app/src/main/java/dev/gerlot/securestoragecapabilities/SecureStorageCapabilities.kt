@@ -1,4 +1,4 @@
-package dev.gerlot.securestoragecapabilitiesinspector
+package dev.gerlot.securestoragecapabilities
 
 import java.util.Date
 

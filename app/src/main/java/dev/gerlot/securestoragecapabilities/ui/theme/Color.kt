@@ -1,4 +1,4 @@
-package dev.gerlot.securestoragecapabilitiesinspector.ui.theme
+package dev.gerlot.securestoragecapabilities.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

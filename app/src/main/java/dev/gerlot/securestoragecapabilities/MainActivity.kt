@@ -1,4 +1,4 @@
-package dev.gerlot.securestoragecapabilitiesinspector
+package dev.gerlot.securestoragecapabilities
 
 import android.content.Intent
 import android.os.Build
@@ -54,8 +54,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
-import dev.gerlot.securestoragecapabilitiesinspector.ui.theme.Green200
-import dev.gerlot.securestoragecapabilitiesinspector.ui.theme.SecureStorageCapabilitiesInspectorTheme
+import dev.gerlot.securestoragecapabilities.ui.theme.Green200
+import dev.gerlot.securestoragecapabilities.ui.theme.SecureStorageCapabilitiesInspectorTheme
 import java.util.Date
 
 class MainActivity : AppCompatActivity() {

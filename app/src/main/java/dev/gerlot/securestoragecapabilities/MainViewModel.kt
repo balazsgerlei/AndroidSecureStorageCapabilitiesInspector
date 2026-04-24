@@ -1,4 +1,4 @@
-package dev.gerlot.securestoragecapabilitiesinspector
+package dev.gerlot.securestoragecapabilities
 
 import android.app.KeyguardManager
 import android.content.Context
