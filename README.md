@@ -10,3 +10,9 @@ The hardware security implementation varies wildly across Android manufacturers.
 Without actually generating test keys, it is not possible to fully assess whether a device supports, for example, different algorithms, so the app does that for you!
 
 These capabilities are rarely listed in the spec sheets of devices, so you need this tool to assess devices.
+
+## Download
+
+[<img height="80" alt="Get it on Google Play"
+src="https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png"
+/>](https://play.google.com/store/apps/details?id=dev.gerlot.securestoragecapabilities)
