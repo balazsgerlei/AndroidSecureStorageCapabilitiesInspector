@@ -1,6 +1,8 @@
 # Android Secure Storage Capabilities Inspector
 
+[![latest release](https://img.shields.io/github/v/release/balazsgerlei/AndroidSecureStorageCapabilitiesInspector)](https://github.com/balazsgerlei/AndroidSecureStorageCapabilitiesInspector/releases/latest)
 [![API](https://img.shields.io/badge/API-23%2B-brightgreen.svg)](https://android-arsenal.com/api?level=23)
+[![license](https://img.shields.io/github/license/balazsgerlei/AndroidSecureStorageCapabilitiesInspector)](https://www.apache.org/licenses/LICENSE-2.0.html)
 [![last commit](https://img.shields.io/github/last-commit/balazsgerlei/AndroidSecureStorageCapabilitiesInspector?color=018786)](https://github.com/balazsgerlei/AndroidSecureStorageCapabilitiesInspector/commits/main)
 
 ![pic1](https://github.com/balazsgerlei/AndroidSecureStorageCapabilitiesInspector/blob/main/app/src/main/res/mipmap-xxhdpi/ic_launcher.png)
