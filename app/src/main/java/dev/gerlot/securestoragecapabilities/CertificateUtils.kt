@@ -1,7 +1,6 @@
 package dev.gerlot.securestoragecapabilities
 
 import kotlin.io.encoding.Base64
-import kotlin.io.encoding.ExperimentalEncodingApi
 
 const val CERTIFICATE_HEADER = "-----BEGIN CERTIFICATE-----"
 const val CERTIFICATE_FOOTER = "-----END CERTIFICATE-----"
@@ -151,7 +150,6 @@ val GOOGLE_ROOT_CERTIFICATES: List<String> = listOf(
     NEW_2026_GOOGLE_ROOT_CERTIFICATE,
 ) + (PREVIOUSLY_ISSUED_GOOGLE_ROOT_CERTIFICATES)
 
-@OptIn(ExperimentalEncodingApi::class)
 fun encodeBERCertificateToString(encoded: ByteArray) = "$CERTIFICATE_HEADER\n${
-    Base64.Default.encode(encoded).chunked(64).joinToString("\n")
+    Base64.encode(encoded).chunked(64).joinToString("\n")
 }\n$CERTIFICATE_FOOTER"

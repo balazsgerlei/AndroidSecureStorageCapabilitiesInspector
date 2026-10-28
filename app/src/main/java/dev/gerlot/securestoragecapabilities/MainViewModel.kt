@@ -89,7 +89,7 @@ class MainViewModel : ViewModel() {
     ) {
         CoroutineScope(Dispatchers.Default).launch {
             val keyStore = KeyStore.getInstance(ANDROID_KEYSTORE).apply {
-                load(null) // The KeyStore needs to be initialized via a call to load, to be able to use it
+                load(null) // The KeyStore needs to be initialized via a call to load to be able to use it
             }
 
             val sampleAESKey = generateSampleAESKey(
@@ -318,7 +318,7 @@ class MainViewModel : ViewModel() {
                         Log.d("SecureStorageCapabilitiesInspector", "ProviderException when StrongBox tried to be used re-init KeyGenerator without it")
                         val keyGenerator = initKeyGeneratorWithAESKeyPair(shouldUseStrongBox = false, requireUserAuthentication)
                         return keyGenerator.generateKey()
-                    } catch (e: Exception) {
+                    } catch (_: Exception) {
                         Log.d("SecureStorageCapabilitiesInspector", "Could not determine if private key is in secure hardware or not")
                         return null
                     }
@@ -406,7 +406,7 @@ class MainViewModel : ViewModel() {
                             digest
                         )
                         return keyPairGenerator.genKeyPair()
-                    } catch (pe: ProviderException) {
+                    } catch (_: ProviderException) {
                         Log.d("SecureStorageCapabilitiesInspector", "ProviderException when attestation challenge provided re-init KeyPairGenerator without it")
                         val keyPairGenerator = initKeyPairGeneratorWithRSAKeyPair(
                             shouldUseStrongBox = false,
@@ -434,7 +434,7 @@ class MainViewModel : ViewModel() {
                                 digest = digest
                             )
                             return keyPairGenerator.genKeyPair()
-                        } catch (pe: ProviderException) {
+                        } catch (_: ProviderException) {
                             try {
                                 Log.d("SecureStorageCapabilitiesInspector", "ProviderException when StrongBox tried to be used re-init KeyGenerator without it")
                                 val keyPairGenerator = initKeyPairGeneratorWithRSAKeyPair(
@@ -444,7 +444,7 @@ class MainViewModel : ViewModel() {
                                     digest = digest
                                 )
                                 return keyPairGenerator.genKeyPair()
-                            } catch (e: Exception) {
+                            } catch (_: Exception) {
                                 Log.d("SecureStorageCapabilitiesInspector", "Could not determine if private key is in secure hardware or not")
                                 return null
                             }
@@ -527,7 +527,7 @@ class MainViewModel : ViewModel() {
                             digest = digest
                         )
                         return keyPairGenerator.genKeyPair()
-                    } catch (pe: ProviderException) {
+                    } catch (_: ProviderException) {
                         Log.d("SecureStorageCapabilitiesInspector", "ProviderException when attestation challenge provided re-init KeyPairGenerator without it")
                         val keyPairGenerator = initKeyPairGeneratorWithECKeyPair(
                             shouldUseStrongBox = false,
@@ -555,7 +555,7 @@ class MainViewModel : ViewModel() {
                                 digest = digest
                             )
                             return keyPairGenerator.genKeyPair()
-                        } catch (pe: ProviderException) {
+                        } catch (_: ProviderException) {
                             try {
                                 Log.d("SecureStorageCapabilitiesInspector", "ProviderException when StrongBox tried to be used re-init KeyGenerator without it")
                                 val keyPairGenerator = initKeyPairGeneratorWithECKeyPair(
@@ -565,7 +565,7 @@ class MainViewModel : ViewModel() {
                                     digest = digest
                                 )
                                 return keyPairGenerator.genKeyPair()
-                            } catch (e: Exception) {
+                            } catch (_: Exception) {
                                 Log.d("SecureStorageCapabilitiesInspector", "Could not determine if private key is in secure hardware or not")
                                 return null
                             }

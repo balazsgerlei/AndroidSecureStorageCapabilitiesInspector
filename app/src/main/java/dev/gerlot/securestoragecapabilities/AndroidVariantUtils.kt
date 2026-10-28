@@ -43,16 +43,16 @@ class AndroidVariantUtils {
                 val oplusVersion = getSystemProperty("ro.build.version.oplusrom")
                 if (oplusVersion.isNotEmpty()) {
                     // To be able to distinguish them, we fall back to checking the manufacturer or legacy Oxygen props
-                    if (getSystemProperty("ro.oxygen.version").isNotEmpty() ||
+                    return if (getSystemProperty("ro.oxygen.version").isNotEmpty() ||
                         Build.MANUFACTURER.contains("oneplus", ignoreCase = true)
                     ) {
-                        return "OxygenOS"
+                        "OxygenOS"
                     } else if (getSystemProperty("ro.realme.ui.version").isNotEmpty()
                         || Build.MANUFACTURER.contains("realme", ignoreCase = true)
                     ) {
-                        return "Realme UI"
+                        "Realme UI"
                     } else {
-                        return "ColorOS"
+                        "ColorOS"
                     }
                 }
 
@@ -121,7 +121,7 @@ class AndroidVariantUtils {
                 }
 
                 /**
-                 * Privacy and Security focused ROMs
+                 * Privacy and Security-focused ROMs
                  */
                 // /e/OS
                 // /e/OS is a fork of LineageOS, so it might share the lineage property,
