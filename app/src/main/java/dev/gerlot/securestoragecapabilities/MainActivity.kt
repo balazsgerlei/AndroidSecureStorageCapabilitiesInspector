@@ -411,7 +411,7 @@ fun HasStrongboxKeystoreDisplay(
     modifier: Modifier = Modifier
 ) {
     val text = if (strongBoxKeystore != null) {
-        "StrongBox available ($strongBoxKeystore)"
+        "StrongBox available (${strongBoxKeystore.displayName})"
     } else "NO StrongBox"
     val icon = when (strongBoxKeystore) {
         null -> Icons.Default.Warning

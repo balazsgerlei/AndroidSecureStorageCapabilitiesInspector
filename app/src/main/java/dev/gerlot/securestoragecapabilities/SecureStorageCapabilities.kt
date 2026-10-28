@@ -13,8 +13,14 @@ enum class BiometricEnrollmentStatus {
     SECURITY_UPDATE_REQUIRED,
 }
 
-enum class StrongBoxKeystoreProperties {
-    V400, V300, V200, V100, V41, V40, VERSION_UNKNOWN
+enum class StrongBoxKeystoreProperties(val displayName: String) {
+    V400("KeyMint 4"),
+    V300("KeyMint 3"),
+    V200("KeyMint 2"),
+    V100("KeyMint 1"),
+    V41("Keymaster 4.1"),
+    V40("Keymaster 4.0"),
+    VERSION_UNKNOWN("Unknown Version")
 }
 
 enum class KeyGenerationSecurityLevel {
